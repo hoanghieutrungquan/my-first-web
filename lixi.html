@@ -1,0 +1,1230 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sân Khấu Bí Mật - Kaito Kid</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+    <style>
+        /* ========================================= */
+        /* --- 1. CSS CƠ BẢN & BACKGROUND --- */
+        /* ========================================= */
+        body { 
+            margin: 0; padding: 0; height: 100vh; 
+            background-image: url('background_dau.jpg'); 
+            background-color: #050204; 
+            background-size: cover; background-position: center; background-repeat: no-repeat;
+            font-family: 'Playfair Display', serif; 
+            display: flex; justify-content: center; align-items: center; 
+            overflow: hidden; text-align: center; 
+            -webkit-tap-highlight-color: transparent; perspective: 1000px; color: #fdfbf7;
+        }
+        body::after { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.6); z-index: -1; pointer-events: none; }
+        body::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background-image: radial-gradient(rgba(255, 253, 224, 0.2) 1px, transparent 1px); background-size: 60px 60px; z-index: -1; pointer-events: none; animation: moveStars 120s linear infinite; opacity: 0.6; }
+        @keyframes moveStars { 0% { background-position: 0 0; } 100% { background-position: -1000px 1000px; } }
+
+        .page { position: absolute; width: 100%; height: 100%; opacity: 0; transition: opacity 1s ease-in-out; pointer-events: none; display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5;}
+        .active { opacity: 1; pointer-events: auto; z-index: 100; }
+
+        .kid-btn { background: linear-gradient(135deg, rgba(20, 10, 15, 0.9), rgba(5, 2, 5, 0.9)); border: 2px solid #d4af37; color: #d4af37; padding: 12px 30px; font-size: 1.1em; font-family: 'Playfair Display', serif; font-weight: 700; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(212, 175, 55, 0.2); backdrop-filter: blur(5px); z-index: 10; position: relative;}
+        .kid-btn:hover:not(:disabled) { background: #d4af37; color: #050204; transform: scale(1.05); box-shadow: 0 5px 25px rgba(212, 175, 55, 0.5); }
+        .kid-btn:disabled { border-color: #555; color: #555; cursor: not-allowed; box-shadow: none; opacity: 0.5;}
+
+        #fireworksCanvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 200; opacity: 0.8; }
+
+        /* ========================================= */
+        /* --- 2. MÀN HÌNH KHÓA & PROFILE --- */
+        /* ========================================= */
+        #lock-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(5, 2, 4, 0.7); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); z-index: 20000; display: flex; justify-content: center; align-items: center; transition: opacity 1s ease-in-out; }
+        .lock-box { background: rgba(10, 5, 8, 0.85); padding: 45px 35px; border-radius: 12px; border: 4px double #d4af37; box-shadow: 0 15px 40px rgba(0,0,0,0.9), inset 0 0 30px rgba(212, 175, 55, 0.15); color: #fdfbf7; width: 85%; max-width: 420px; transition: transform 0.1s; position: relative; }
+        .lock-box h2 { color: #d4af37; text-shadow: 0 0 15px rgba(212, 175, 55, 0.6); margin-top: 0; font-size: 1.9em; letter-spacing: 2px;}
+        .lock-box p { font-size: 1em; line-height: 1.6; margin-bottom: 20px; color: #e0d8c8;}
+        .passcode-input { width: 80%; padding: 12px; font-size: 1.3em; text-align: center; background: rgba(0,0,0,0.6); border: 1px solid #d4af37; color: #d4af37; border-radius: 8px; font-family: 'Playfair Display', serif; letter-spacing: 2px; outline: none; margin-bottom: 15px; box-shadow: inset 0 0 15px rgba(0,0,0,0.9); transition: all 0.3s;}
+        .passcode-input:focus { border-color: #fdfbf7; box-shadow: 0 0 20px rgba(212, 175, 55, 0.5); transform: scale(1.02); }
+        .lock-error { color: #c0392b; font-style: italic; font-weight: bold; min-height: 40px; margin-top: 15px; text-shadow: 0 0 5px rgba(192, 57, 43, 0.5); line-height: 1.4;}
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 20%, 60% { transform: translateX(-10px); } 40%, 80% { transform: translateX(10px); } }
+        .shake-animation { animation: shake 0.4s; }
+
+        #user-profile-widget { position: fixed; top: 15px; right: 15px; z-index: 15000; display: flex; align-items: center; gap: 12px; opacity: 0; transform: translateY(-20px); transition: all 0.8s cubic-bezier(0.25, 1, 0.5, 1); pointer-events: none; }
+        #user-profile-widget.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+        .profile-info { background: rgba(10, 5, 8, 0.85); border: 1.5px solid #d4af37; padding: 6px 15px; border-radius: 12px; text-align: right; backdrop-filter: blur(8px); box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        .profile-name { color: #d4af37; font-weight: bold; font-style: italic; font-size: 0.75em; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px;}
+        .profile-balance { color: #00ff00; font-weight: bold; font-size: 1.3em; text-shadow: 0 0 10px rgba(0, 255, 0, 0.5); font-family: monospace;}
+        .profile-avatar-ring { width: 55px; height: 55px; border-radius: 50%; background: conic-gradient(#ea4335 0deg 90deg, #4285f4 90deg 180deg, #34a853 180deg 270deg, #fbbc05 270deg 360deg); padding: 3.5px; box-sizing: border-box; box-shadow: 0 5px 15px rgba(0,0,0,0.8); }
+        .profile-avatar-img { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; background: #fff; border: 2px solid #050204; box-sizing: border-box; }
+
+        .stage-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; overflow: hidden; }
+        .curtain { position: absolute; top: 0; height: 100%; width: 30%; background: linear-gradient(to right, #5a0b0b 0%, #8b0000 20%, #a52a2a 40%, #5a0b0b 60%, #8b0000 80%, #3d0505 100%); box-shadow: 10px 0 20px rgba(0,0,0,0.5); }
+        .curtain.left { left: 0; transform-origin: top left; } .curtain.right { right: 0; transform: scaleX(-1); transform-origin: top right; }
+        .curtain-top { position: absolute; top: -10%; left: 0; width: 100%; height: 25%; background: radial-gradient(ellipse at top, #a52a2a 0%, #8b0000 60%, #5a0b0b 100%); border-radius: 0 0 50% 50%; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .stage-floor { position: absolute; bottom: 0; left: 0; width: 100%; height: 30%; background: linear-gradient(to bottom, #2b131e 0%, #1a0f0f 100%); transform: rotateX(60deg) scale(1.5); transform-origin: bottom center; border-top: 5px solid #3d2b1f; }
+        
+        #intro-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: transparent; z-index: 9999; display: none; justify-content: center; align-items: center; transition: opacity 1.5s ease-in-out; pointer-events: none; flex-direction: column; }
+        .intro-text-container { position: absolute; z-index: 1; display: flex; flex-direction: column; align-items: center; opacity: 0; }
+        .intro-welcome { font-size: 2em; color: #fdfbf7; font-style: italic; margin-bottom: 10px; text-shadow: 0 0 10px rgba(255, 255, 255, 0.5); opacity: 0; transform: translateY(20px); }
+        .intro-year { font-size: 5.5em; color: #d4af37; font-weight: 700; line-height: 1; text-shadow: 0 0 20px rgba(212, 175, 55, 0.8), 0 0 40px rgba(212, 175, 55, 0.4); opacity: 0; transform: scale(0.8); }
+        .doves-ring { position: absolute; width: 10px; height: 10px; top: 50%; left: 50%; z-index: 2; opacity: 0; }
+        .intro-dove { position: absolute; top: 50%; left: 50%; font-size: 2.5em; transform: translate(-50%, -50%) rotate(calc(var(--i) * 36deg)) translateY(-140px) scaleX(-1); filter: brightness(1.2) drop-shadow(0 0 8px rgba(255, 253, 224, 0.9)); }
+        .run-intro-text { animation: textContainerFadeIn 4.5s ease-in-out forwards; }
+        @keyframes textContainerFadeIn { 0% { opacity: 0; } 20% { opacity: 1; } 80% { opacity: 1; } 100% { opacity: 0; } }
+        .run-intro-text .intro-welcome { animation: welcomeAppear 1.5s ease-out 0.5s forwards; }
+        @keyframes welcomeAppear { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        .run-intro-text .intro-year { animation: yearGlowBoom 4s ease-in-out 1s forwards; }
+        @keyframes yearGlowBoom { 0% { opacity: 0; transform: scale(0.8); letter-spacing: 0px; } 20% { opacity: 1; transform: scale(1); letter-spacing: 5px; } 80% { opacity: 1; transform: scale(1); letter-spacing: 8px; } 100% { opacity: 0; transform: scale(1.1); letter-spacing: 15px; } }
+        .run-doves-ring { animation: spinRingSlow 4.5s linear forwards; }
+        @keyframes spinRingSlow { 0% { transform: rotate(0deg) scale(0.9); opacity: 0; } 20% { opacity: 1; transform: rotate(72deg) scale(1); } 80% { opacity: 1; transform: rotate(288deg) scale(1); } 100% { transform: rotate(360deg) scale(1.1); opacity: 0; } }
+
+        /* ========================================= */
+        /* --- 3. PAGE 1: LÁ THƯ --- */
+        /* ========================================= */
+        #envelope-wrapper { display: flex; flex-direction: column; align-items: center; cursor: pointer; transition: all 0.5s ease; position: absolute; z-index: 15; opacity: 0; pointer-events: none; }
+        .run-envelope { animation: magicEnvelopeAppear 1.2s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; animation-delay: 4.5s; }
+        @keyframes magicEnvelopeAppear { 0% { opacity: 0; transform: scale(0) translateY(300px) rotate(-45deg); } 70% { opacity: 1; transform: scale(1.05) translateY(-20px) rotate(5deg); pointer-events: auto; } 100% { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); pointer-events: auto; } }
+        .env-hide { opacity: 0 !important; transform: scale(1.5) translateY(-50px) !important; visibility: hidden !important; pointer-events: none !important; }
+        .env-body { width: 360px; height: 240px; background: #fdfbf7; border: 3px solid #d4af37; border-radius: 8px; position: relative; box-shadow: 0 20px 50px rgba(0,0,0,0.8); transition: transform 0.3s ease; }
+        .env-wrapper:hover .env-body { transform: scale(1.05); }
+        .env-flap { position: absolute; top: 0; left: 0; border-left: 180px solid transparent; border-right: 180px solid transparent; border-top: 130px solid #ece4d0; z-index: 1; }
+        .env-seal { position: absolute; top: 90px; left: 50%; transform: translateX(-50%); background: #8b0000; color: #d4af37; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 1.8em; box-shadow: 0 5px 15px rgba(0,0,0,0.5), inset 0 0 5px rgba(0,0,0,0.5); border: 3px solid #a52a2a; z-index: 2; }
+        .env-hint { margin-top: 40px; font-size: 1.3em; color: rgba(255, 255, 255, 0.9); font-style: italic; animation: pulse 2s infinite; letter-spacing: 2px; }
+        
+        #opened-letter { opacity: 0; transform: scale(0.5) translateY(50px) rotate(0deg); transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275); pointer-events: none; position: absolute; z-index: 10; }
+        #opened-letter.show { opacity: 1; transform: scale(1) translateY(0) rotate(0deg); pointer-events: auto; }
+        .calling-card { background: rgba(253, 253, 253, 0.95); width: 95vw; max-width: 650px; padding: 40px 30px; border-radius: 8px; box-shadow: 0 25px 60px rgba(0,0,0,0.8); color: #2c3e50; border: 1px solid #ddd; box-sizing: border-box; backdrop-filter: blur(5px);}
+        .card-content { font-size: 1.15em; line-height: 1.8; font-weight: 600; margin-bottom: 25px; text-align: center; }
+        .btn-container { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 15px; width: 100%; position: relative; z-index: 2;}
+        .card-btn { background: transparent; border: 2px solid #2c3e50; color: #2c3e50; padding: 10px 18px; font-size: 0.95em; font-family: 'Playfair Display', serif; font-weight: 700; border-radius: 25px; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; flex: 1 1 auto; max-width: 150px; }
+        .card-btn:hover { background: #2c3e50; color: #fdfdfd; box-shadow: 0 5px 15px rgba(44, 62, 80, 0.4); transform: scale(1.05); }
+        .kid-message { margin-top: 15px; font-size: 0.9em; color: #c0392b; font-style: italic; opacity: 0; transform: translateY(10px); transition: all 0.5s ease; height: 25px; font-weight: bold;}
+
+        /* ========================================= */
+        /* --- 4. PAGE 2: TAROT --- */
+        /* ========================================= */
+        #p2-intro { background: rgba(10, 5, 8, 0.8); padding: 30px 40px; border-radius: 15px; border: 1px solid rgba(212, 175, 55, 0.4); box-shadow: 0 15px 35px rgba(0,0,0,0.8); backdrop-filter: blur(8px); font-size: 1.2em; line-height: 1.6; max-width: 700px; margin-bottom: 40px; transition: opacity 0.5s; }
+        #p2-intro h2 { color: #d4af37; text-shadow: 0 0 15px rgba(212, 175, 55, 0.6); margin-top: 0; font-size: 1.8em;}
+        .cards-grid { display: none; flex-wrap: wrap; justify-content: center; gap: 20px; max-width: 1200px; width: 100%; perspective: 1500px; z-index: 10;}
+        .p2-card-wrapper { width: 220px; height: 330px; cursor: pointer; opacity: 0; animation: superCardDeal 0.8s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+        @keyframes superCardDeal { 0% { opacity: 0; transform: scale(0.2) rotate(1080deg); filter: blur(20px); } 60% { opacity: 1; transform: scale(1.05) rotate(-10deg); filter: blur(0px); } 100% { opacity: 1; transform: scale(1) rotate(0deg); } }
+        .p2-card-inner { width: 100%; height: 100%; transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1); transform-style: preserve-3d; position: relative; box-shadow: 0 20px 40px rgba(0,0,0,0.8); border-radius: 12px; }
+        .p2-card-wrapper.flipped .p2-card-inner { transform: rotateY(180deg); }
+        .p2-card-wrapper:hover:not(.flipped) .p2-card-inner { transform: scale(1.05) translateY(-15px); }
+        .p2-card-front, .p2-card-back { width: 100%; height: 100%; position: absolute; backface-visibility: hidden; border-radius: 12px; display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
+        .p2-card-front { background: repeating-linear-gradient(45deg, #700000, #700000 15px, #4a0000 15px, #4a0000 30px); border: 4px solid #d4af37; color: #d4af37; box-shadow: inset 0 0 30px rgba(0,0,0,0.9); }
+        .card-mini-seal { background: #2b131e; border: 2px solid #d4af37; width: 80px; height: 80px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 3.5em; box-shadow: 0 0 15px rgba(0,0,0,0.6); }
+        .suit-red { color: #c0392b; } .suit-black { color: #2c3e50; }
+        .p2-card-back { background: linear-gradient(135deg, #fdfbf7, #f3ebd5); transform: rotateY(180deg); border: 3px solid #d4af37; text-align: center; color: #2b131e;}
+        .card-title { margin: 10px 0; font-size: 1.8em; font-weight: 800; text-transform: uppercase;}
+        .card-desc { margin: 0; font-size: 1em; font-style: italic; font-weight: 600; line-height: 1.4;}
+        #p2-next-btn { display: none; margin-top: 40px; animation: pulse 2s infinite; font-size: 1.1em; padding: 12px 25px;}
+
+        /* ========================================= */
+        /* --- 5. PAGE 3: GAME HỨNG LÌ XÌ --- */
+        /* ========================================= */
+        #game-intro-box { background: rgba(10, 5, 8, 0.85); padding: 40px; border-radius: 15px; border: 2px solid rgba(212, 175, 55, 0.6); box-shadow: 0 15px 40px rgba(0,0,0,0.9); backdrop-filter: blur(10px); color: #fdfbf7; max-width: 550px; z-index: 10; }
+        #game-intro-box h2 { color: #d4af37; font-size: 2em; margin-top: 0; text-shadow: 0 0 15px rgba(212, 175, 55, 0.6);}
+        #game-ui { display: none; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 10;}
+        
+        .game-hud { position: absolute; top: 80px; left: 50%; transform: translateX(-50%); width: 85%; max-width: 350px; background: rgba(0,0,0,0.8); border: 2px solid #d4af37; border-radius: 15px; padding: 10px 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 15; }
+        .game-stats { display: flex; justify-content: space-between; align-items: center; font-size: 1.5em; font-weight: bold; color: #d4af37; }
+        #game-play-area { position: absolute; top: 150px; left: 0; width: 100%; height: calc(100% - 150px); overflow: hidden;}
+        
+        .falling-card { position: absolute; bottom: -150px; width: 70px; height: 100px; cursor: pointer; background: repeating-linear-gradient(45deg, #700000, #700000 8px, #4a0000 8px, #4a0000 16px); border: 2px solid #d4af37; border-radius: 6px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; font-size: 1.8em; pointer-events: auto; animation: flyUpGame linear forwards; }
+        .falling-card::after { content: '🎩'; background: #2b131e; border-radius: 50%; width: 25px; height: 25px; display: flex; justify-content: center; align-items: center; font-size: 0.6em; border: 1px solid #d4af37;}
+        .rare-card { border-color: #ff00ff; box-shadow: 0 0 20px #ff00ff, inset 0 0 20px #ff00ff; }
+        .rare-card::after { content: '🌟'; }
+        @keyframes flyUpGame { 0% { transform: translateY(0) rotate(0deg); } 100% { transform: translateY(-120vh) rotate(360deg); } }
+
+        .floating-money { position: absolute; color: #00ff00; font-weight: bold; font-size: 1.8em; text-shadow: 0 2px 5px rgba(0,0,0,1); animation: floatMoney 0.8s forwards; pointer-events: none; z-index: 100;}
+        .floating-money.rare { color: #ff00ff; font-size: 2.2em; text-shadow: 0 0 10px #ff00ff; }
+        .floating-money.zero { color: #888; font-size: 1.2em; text-shadow: none; }
+        @keyframes floatMoney { 0% { opacity: 1; transform: translateY(0) scale(1); } 100% { opacity: 0; transform: translateY(-50px) scale(1.5); } }
+
+        #game-result-box { display: none; background: rgba(10, 5, 8, 0.95); padding: 40px; border-radius: 15px; border: 2px solid #d4af37; box-shadow: 0 15px 40px rgba(0,0,0,0.9); color: #fdfbf7; max-width: 500px; z-index: 20; position: relative; }
+        #game-result-box h2 { color: #d4af37; font-size: 2.2em; margin-top: 0; text-shadow: 0 0 15px rgba(212, 175, 55, 0.6);}
+        .tease-message { font-size: 1.1em; line-height: 1.6; color: #ffb6c1; font-style: italic; margin-bottom: 25px;}
+
+        /* ========================================= */
+        /* --- 6. PAGE 4: GACHA MASTERPIECE --- */
+        /* ========================================= */
+        #rules-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(3, 1, 5, 0.85); z-index: 500; display: none; justify-content: center; align-items: center; backdrop-filter: blur(12px); opacity: 0; transition: opacity 0.8s ease-in-out; }
+        .rules-box { background: linear-gradient(145deg, rgba(30, 15, 20, 0.95), rgba(10, 5, 8, 0.95)); border: 2px solid #d4af37; border-radius: 20px; padding: 35px 30px; width: 85%; max-width: 450px; text-align: center; box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 30px rgba(212, 175, 55, 0.15); }
+        .rules-box h2 { color: #d4af37; margin: 0 0 15px 0; font-size: 2em; font-weight: 700; text-shadow: 0 0 20px rgba(212, 175, 55, 0.6); border-bottom: 1px dashed #d4af37; padding-bottom: 10px;}
+        .rules-desc { font-size: 1.1em; line-height: 1.5; color: #fdfbf7; margin-bottom: 20px; }
+        .rules-items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; text-align: left; margin-bottom: 25px; padding: 15px; border-radius: 12px; background: rgba(0,0,0,0.6); border: 1px solid rgba(212, 175, 55, 0.4); }
+        .rule-item { display: flex; align-items: center; gap: 8px; font-size: 0.9em; font-family: sans-serif;}
+        .rule-item span.money { color: #00ff00; font-family: monospace; font-weight: bold; font-size: 1.1em;}
+        .rule-item span.rarity { font-size: 0.7em; padding: 3px 6px; border-radius: 6px; color: white; font-weight: 900;}
+
+        .gacha-hud-left { position: absolute; top: 15px; left: 15px; background: linear-gradient(135deg, rgba(20, 10, 15, 0.85), rgba(5, 2, 5, 0.9)); border: 1.5px solid #d4af37; border-radius: 12px; padding: 8px 15px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 20px rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 20; min-width: 90px; }
+        .gacha-hud-label { font-size: 0.7em; color: #d4af37; font-style: italic; margin-bottom: 3px; font-weight: bold; text-transform: uppercase;}
+        .gacha-hud-value { color: #fdfbf7; font-size: 1.3em; font-weight: bold;}
+
+        .side-panel { position: absolute; bottom: 90px; background: linear-gradient(135deg, rgba(30, 15, 20, 0.85), rgba(10, 5, 8, 0.95)); border: 2px solid rgba(212, 175, 55, 0.6); border-radius: 12px; padding: 15px; width: 140px; box-shadow: 0 15px 30px rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 10; }
+        .panel-left { left: 20px; } .panel-right { right: 20px; }
+        .side-panel h3 { margin: 0 0 10px 0; font-size: 0.9em; color: #d4af37; text-align: center; border-bottom: 1px solid rgba(212, 175, 55, 0.4); padding-bottom: 8px; text-transform: uppercase;}
+        .side-panel ul { list-style: none; padding: 0; margin: 0; font-size: 0.85em; font-family: sans-serif; font-weight: bold; min-height: 120px;}
+        .side-panel li { margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; background: rgba(0,0,0,0.5); padding: 5px 8px; border-radius: 6px;}
+        .val-money { color: #00ff00; font-family: monospace; font-size: 1.1em; }
+        .val-count { color: #fdfbf7; font-size: 1.1em; background: rgba(212, 175, 55, 0.4); padding: 2px 6px; border-radius: 4px;}
+
+        .exchange-area { text-align: center; margin-top: 15px; border-top: 1px dashed rgba(212, 175, 55, 0.5); padding-top: 15px;}
+        .exchange-total { color: #f1c40f; font-weight: bold; font-size: 1.2em; margin-bottom: 10px; font-family: monospace;}
+        #btn-exchange { width: 100%; background: rgba(0,0,0,0.6); border: 2px solid #d4af37; color: #d4af37; padding: 10px; font-size: 0.9em; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s; text-transform: uppercase;}
+        #btn-exchange.active-exchange { background: linear-gradient(45deg, #27ae60, #2ecc71); border-color: #2ecc71; color: #050204; box-shadow: 0 0 15px #2ecc71; animation: pulseEx 1.5s infinite; }
+        @keyframes pulseEx { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        #btn-exchange:disabled { border-color: #444; color: #666; cursor: not-allowed; box-shadow: none; opacity: 0.5;}
+
+        #gacha-stage { position: relative; width: 100%; height: 50vh; display: flex; justify-content: center; align-items: flex-end; margin-top: 50px; perspective: 1200px; z-index: 5; }
+        .magic-hat-container { position: relative; z-index: 15; display: flex; justify-content: center; align-items: center; }
+        .magic-hat { font-size: 10em; transform: rotate(180deg); filter: invert(1) sepia(1) saturate(5) hue-rotate(180deg) brightness(1.6) drop-shadow(0 -20px 30px rgba(255,255,255,0.4)); line-height: 1; margin-bottom: -20px; animation: floatHat 4s ease-in-out infinite; cursor: pointer;}
+        @keyframes floatHat { 0%, 100% { transform: rotate(180deg) translateY(0); } 50% { transform: rotate(180deg) translateY(-15px); } }
+        .hat-rumbling { animation: hatRumbleUpsideDown 0.6s ease-in-out !important; }
+        @keyframes hatRumbleUpsideDown { 0% { transform: rotate(180deg) scale(1); } 25% { transform: rotate(170deg) scale(1.05); } 50% { transform: rotate(190deg) scale(1.05); } 75% { transform: rotate(175deg) scale(1.05); } 100% { transform: rotate(180deg) scale(1); } }
+        .magic-wand { position: absolute; font-size: 5em; top: -30px; left: 50%; transform: translateX(-50%) rotate(15deg); z-index: 20; filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.9)); opacity: 0; }
+        .wand-lifting { animation: wandLift 0.8s ease-in-out forwards; }
+        @keyframes wandLift { 0% { opacity: 1; transform: translateX(-50%) translateY(0) rotate(15deg); } 50% { opacity: 1; transform: translateX(-50%) translateY(-60px) rotate(-20deg); } 100% { opacity: 0; transform: translateX(-50%) translateY(0) rotate(15deg); } }
+        .magic-dove { position: absolute; bottom: 80px; font-size: 3em; z-index: 12; pointer-events: none; opacity: 0; filter: drop-shadow(0 0 15px rgba(255, 255, 255, 0.8)); animation: doveFlyOut 1.5s ease-out forwards; }
+        @keyframes doveFlyOut { 0% { transform: translate(0, 0) scale(0.2) rotate(0deg); opacity: 0; } 20% { opacity: 1; transform: translate(calc(var(--tx) * 0.2), calc(var(--ty) * 0.2)) scale(0.8) rotate(calc(var(--rot) * 0.5)); } 100% { transform: translate(var(--tx), var(--ty)) scale(1.5) rotate(var(--rot)); opacity: 0; } }
+
+        .gacha-card-wrapper { position: absolute; bottom: 30px; width: 110px; height: 160px; opacity: 0; pointer-events: none; z-index: 4; perspective: 1000px; }
+        .gacha-card-inner { width: 100%; height: 100%; position: relative; transform-style: preserve-3d; transition: transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1); border-radius: 10px; }
+        .gacha-card-wrapper.flipped .gacha-card-inner { transform: rotateY(180deg); }
+        
+        .gacha-card-face { width: 100%; height: 100%; position: absolute; top: 0; left: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: 10px; display: flex; flex-direction: column; justify-content: center; align-items: center; overflow: hidden;}
+        .gacha-card-front { background: repeating-linear-gradient(45deg, #1a0f0f, #1a0f0f 12px, #2b131e 12px, #2b131e 24px); border: 2px solid #d4af37; transform: rotateY(0deg); }
+        .gacha-card-front::before { content: ''; position: absolute; top: -100%; left: -100%; width: 50%; height: 300%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.4), transparent); transform: rotate(45deg); animation: shineSwipe 3s infinite; pointer-events: none; }
+        .card-suit-back { background: radial-gradient(circle, #fdfbf7, #e0d8c8); border-radius: 50%; width: 45px; height: 45px; display: flex; justify-content: center; align-items: center; border: 2px solid #d4af37; font-size: 2em; box-shadow: inset 0 0 10px rgba(0,0,0,0.6); z-index: 2;}
+        
+        .gacha-card-back { border: 2px solid transparent; color: #2b131e; transform: rotateY(180deg); padding: 5px; box-sizing: border-box; text-align: center; }
+        
+        .rarity-n { border-color: #bdc3c7; background: linear-gradient(135deg, #fdfbf7, #d5d8dc); box-shadow: 0 0 15px rgba(255,255,255,0.4); }
+        .rarity-r { border-color: #3498db; background: linear-gradient(135deg, #ebf5fb, #aed6f1); box-shadow: 0 0 25px rgba(52, 152, 219, 0.8); }
+        .rarity-sr { border-color: #9b59b6; background: linear-gradient(135deg, #f5eef8, #d7bde2); animation: glow-sr 1s infinite alternate; }
+        @keyframes glow-sr { from { box-shadow: 0 0 15px #9b59b6; } to { box-shadow: 0 0 35px #e056fd, 0 0 15px #e056fd inset; } }
+        .rarity-ur { border-color: #f1c40f; background: linear-gradient(135deg, #fef9e7, #f9e79f); animation: glow-ur 0.8s infinite alternate; }
+        @keyframes glow-ur { from { box-shadow: 0 0 20px #f1c40f; } to { box-shadow: 0 0 50px #ff3f34, 0 0 20px #f1c40f inset; } }
+
+        .card-icon-emoji { font-size: 3em; margin-bottom: 5px; filter: drop-shadow(0 3px 5px rgba(0,0,0,0.4));}
+        .card-item-name { font-size: 1.1em; font-weight: 900; text-transform: uppercase; text-align: center; line-height: 1.1;}
+        .card-rarity-badge { font-size: 0.8em; font-weight: 900; padding: 2px 8px; border-radius: 5px; color: white; margin-bottom: 5px; letter-spacing: 1px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);}
+        .badge-n { background: #7f8c8d; } .badge-r { background: #3498db; } .badge-sr { background: #9b59b6; } .badge-ur { background: linear-gradient(45deg, #f1c40f, #e74c3c); }
+
+        .action-container-gacha { position: absolute; bottom: 20px; display: flex; gap: 15px; z-index: 20; height: 50px; align-items: center; display: none; }
+        .btn-gacha { background: linear-gradient(135deg, rgba(20, 10, 15, 0.9), rgba(5, 2, 5, 0.9)); border: 2px solid #d4af37; color: #d4af37; padding: 12px 25px; font-size: 1.1em; font-family: 'Playfair Display', serif; font-weight: 700; border-radius: 30px; cursor: pointer; transition: all 0.3s ease; letter-spacing: 1px; box-shadow: 0 5px 15px rgba(0,0,0,0.5); backdrop-filter: blur(5px); }
+        .btn-gacha:hover:not(:disabled) { background: #d4af37; color: #050204; transform: scale(1.05); box-shadow: 0 10px 25px rgba(212, 175, 55, 0.6); }
+        .btn-gacha:disabled { border-color: #555; color: #555; cursor: not-allowed; opacity: 0.5; background: rgba(0,0,0,0.5);}
+        .btn-gacha.reveal { background: linear-gradient(45deg, #d4af37, #f1c40f); color: #050204; animation: pulseBtn 1.5s infinite; font-size: 1.3em; padding: 15px 40px; border: none;}
+
+        .magic-particle { position: absolute; pointer-events: none; z-index: 30; font-size: 1.2em; will-change: transform, opacity; }
+        .particle-card { animation: tumble 0.8s linear infinite; }
+
+        /* ========================================= */
+        /* --- 7. CSS BỔ SUNG TỪ GAME CASINO --- */
+        /* ========================================= */
+        /* Riêng Page 5 áp dụng màu nền Casino */
+        #page5 { background: radial-gradient(circle at center, #0a4d2e 0%, #032112 100%); }
+        
+        #tlmn-arena { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; width: 100vw; position: relative; }
+        
+        .card-counter { background: rgba(0,0,0,0.6); padding: 3px 10px; border-radius: 12px; border: 1px solid #d4af37; color: #fdfbf7; font-size: 0.85em; font-family: sans-serif; font-weight: bold; letter-spacing: 1px; display: none; margin-bottom: 5px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);}
+        .counter-kid { margin-top: -2px; }
+        .counter-player { position: absolute; bottom: 195px; z-index: 5; }
+
+        .tlmn-kid-zone { position: absolute; top: 15px; left: 50%; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; gap: 5px; z-index: 5;}
+        .tlmn-kid-img { width: 55px; height: 55px; border-radius: 50%; border: 3px solid #d4af37; box-shadow: 0 0 15px #d4af37; background: #fff; object-fit: cover;}
+        .kid-hidden-cards, .player-hidden-cards { display: flex; justify-content: center; transition: all 0.5s ease;}
+        .kid-hidden-cards { margin-top: -5px; }
+        .player-hidden-cards { position: absolute; bottom: 85px; width: 100%; z-index: 3;}
+        
+        .hidden-card { width: 35px; height: 50px; background: repeating-linear-gradient(45deg, #700000, #700000 5px, #4a0000 5px, #4a0000 10px); border: 1px solid #d4af37; border-radius: 4px; margin-left: -15px; background-color: white; padding: 2px; background-clip: content-box; transition: all 0.3s; }
+        .hidden-card:first-child { margin-left: 0; }
+        .player-hidden-cards .hidden-card { width: 70px; height: 100px; margin-left: -30px; border-radius: 6px; }
+
+        .kid-dialogue-box { background: rgba(10, 5, 8, 0.95); border: 2px solid #d4af37; border-radius: 15px; padding: 15px 25px; width: 85%; max-width: 420px; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.8); position: absolute; top: 120px; opacity: 0; transform: translateY(-20px); transition: all 0.4s ease; z-index: 20; }
+        .kid-dialogue-box.show { opacity: 1; transform: translateY(0); }
+        .kid-dialogue-box p { color: #fdfbf7; font-size: 1.1em; line-height: 1.5; margin: 0; }
+        .kid-dialogue-box::after { content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); border-width: 0 10px 10px 10px; border-style: solid; border-color: transparent transparent #d4af37 transparent; }
+
+        .tlmn-card, .tlmn-card-play, .expose-static-card { 
+            width: 70px; height: 100px; background: #fff; border-radius: 6px; border: 1px solid #999; box-shadow: 0 5px 10px rgba(0,0,0,0.4); 
+            position: relative; font-weight: bold; font-family: sans-serif; background-image: linear-gradient(135deg, #fff 0%, #f0f0f0 100%);
+        }
+        .card-top-left { position: absolute; top: 3px; left: 4px; text-align: center; font-size: 1em; line-height: 0.9; }
+        .card-bottom-right { position: absolute; bottom: 3px; right: 4px; text-align: center; font-size: 1em; line-height: 0.9; transform: rotate(180deg); }
+        .center-suit { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2.2em; }
+
+        .tlmn-center-board { position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%); width: 300px; height: 150px; display: flex; justify-content: center; align-items: center; z-index: 2;}
+        .tlmn-card-play { position: absolute; opacity: 0; transform: scale(1.5) rotate(0deg); transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1); margin-left: var(--ml); }
+        .tlmn-card-play.show { opacity: 1; transform: scale(1.1) rotate(var(--rot)); }
+        .glow-kid { border: 2px solid #e74c3c; box-shadow: 0 0 15px rgba(231, 76, 60, 0.6); }
+        .glow-player { border: 2px solid #f1c40f; box-shadow: 0 0 15px rgba(241, 196, 15, 0.6); }
+
+        .player-hand-area { position: absolute; bottom: 85px; display: flex; justify-content: center; display: none; transition: all 0.8s ease; width: 100%; z-index: 4;}
+        .player-hand-area.show { display: flex; animation: fadeUpHand 0.5s ease forwards; }
+        @keyframes fadeUpHand { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+        .tlmn-card { cursor: pointer; transition: all 0.2s ease; margin-left: -20px; }
+        .tlmn-card:first-child { margin-left: 0; }
+        .tlmn-card:hover { transform: translateY(-15px); z-index: 10; border: 2px solid #d4af37; }
+        .tlmn-card.selected { transform: translateY(-25px); border: 2px solid #f1c40f; box-shadow: 0 15px 20px rgba(0,0,0,0.5); z-index: 15; }
+        .tlmn-card.played { opacity: 0; pointer-events: none; width: 0; margin-left: 0; border: none; }
+
+        .action-btns { position: absolute; bottom: 15px; display: flex; gap: 15px; display: none; z-index: 20;}
+        .fraud-alert-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(192, 57, 43, 0.3); z-index: 10000; display: none; flex-direction: column; justify-content: center; align-items: center; animation: sirenFlash 0.5s infinite alternate; }
+        @keyframes sirenFlash { from { background: rgba(192, 57, 43, 0.1); } to { background: rgba(192, 57, 43, 0.5); } }
+        .btn-fraud { background: #c0392b; border: 3px solid #fff; color: #fff; padding: 20px 40px; font-size: 1.6em; font-weight: 900; border-radius: 50px; cursor: pointer; text-transform: uppercase; box-shadow: 0 0 30px #c0392b; animation: pulseBtn 1s infinite; letter-spacing: 1px;}
+        @keyframes pulseBtn { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+        .time-skip-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #000; z-index: 5000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 1s ease; }
+        .time-skip-overlay.show { opacity: 1; pointer-events: auto; }
+        .time-skip-text { color: #fff; font-size: 1.8em; font-style: italic; font-weight: bold; letter-spacing: 2px; opacity: 0; animation: blinkText 2s infinite; text-align: center;}
+        @keyframes blinkText { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
+
+        .expose-box { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) scale(0); background: rgba(0,0,0,0.95); border: 2px solid #ff0000; padding: 30px 20px; border-radius: 15px; display: flex; flex-direction: column; align-items: center; z-index: 15000; transition: transform 0.5s cubic-bezier(0.25, 1, 0.5, 1); box-shadow: 0 0 50px rgba(255,0,0,0.5); width: 90%; max-width: 420px;}
+        .expose-box.show { transform: translate(-50%, -50%) scale(1); }
+        .expose-box p { color: white; font-size: 1.1em; margin: 10px 0 25px 0; line-height: 1.4; text-align: center;}
+        .expose-cards-container { display: flex; justify-content: space-around; width: 100%; gap: 10px;}
+        .expose-card-col { display: flex; flex-direction: column; align-items: center; gap: 15px;}
+        .expose-label { color: #fdfbf7; font-size: 0.9em; font-weight: bold; text-transform: uppercase; text-shadow: 0 2px 5px black;}
+
+        #final-farewell-box { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(10, 5, 8, 0.95); padding: 40px 30px; border-radius: 15px; border: 2px solid #d4af37; box-shadow: 0 15px 40px rgba(0,0,0,0.9); color: #fdfbf7; max-width: 500px; width: 90%; z-index: 20000; text-align: center; }
+
+        #dealing-deck { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); display: none; z-index: 100; }
+        .dealing-fly-card { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 101; }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .side-panel { width: 120px; bottom: 90px; padding: 10px; }
+            .panel-left { left: 10px; } .panel-right { right: 10px; }
+            .side-panel h3 { font-size: 0.8em; margin-bottom: 8px;}
+            .side-panel li { font-size: 0.75em; margin-bottom: 6px;}
+            .gacha-hud-left { min-width: auto; padding: 4px 8px; top: 10px; left: 10px;}
+            .gacha-hud-label { font-size: 0.55em; }
+            .gacha-hud-value { font-size: 1.1em; }
+            #btn-exchange { font-size: 0.8em; padding: 8px; }
+            .rules-box { padding: 30px 20px; width: 90%;}
+            .rules-items { grid-template-columns: 1fr; gap: 10px; }
+            .action-container-gacha { gap: 10px; bottom: 15px; }
+            .btn-gacha { padding: 10px 18px; font-size: 0.95em; }
+            .gacha-card-wrapper { width: 90px; height: 130px; }
+
+            .tlmn-card, .tlmn-card-play, .expose-static-card { width: 55px; height: 80px; margin-left: -25px;}
+            .player-hidden-cards .hidden-card { width: 55px; height: 80px; margin-left: -25px;}
+            .card-top-left, .card-bottom-right { font-size: 0.85em; }
+            .center-suit { font-size: 1.8em; }
+            .kid-dialogue-box { top: 110px; padding: 10px 15px; }
+            .kid-dialogue-box p { font-size: 1em; }
+            .player-hand-area, .player-hidden-cards { bottom: 70px; }
+            .counter-player { bottom: 160px; }
+            .btn-fraud { font-size: 1.2em; padding: 15px 25px;}
+        }
+    </style>
+</head>
+<body>
+
+    <audio id="bgMusic" loop><source src="nhac.mp3" type="audio/mpeg"></audio>
+    <audio id="gameMusic" loop><source src="nhac_game.mp3" type="audio/mpeg"></audio>
+    <audio id="gachaMusic" loop><source src="gacha.mp3" type="audio/mpeg"></audio>
+    <canvas id="fireworksCanvas"></canvas>
+
+    <div id="user-profile-widget">
+        <div class="profile-info">
+            <div id="profile-name" class="profile-name">Khách Mời</div>
+            <div id="profile-balance" class="profile-balance">0đ</div>
+        </div>
+        <div class="profile-avatar-ring"><img src="avatar.png" alt="Avatar" class="profile-avatar-img" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=Nhi&backgroundColor=fdfbf7'"></div>
+    </div>
+
+    <div id="lock-screen">
+        <div class="lock-box" id="lock-box">
+            <h2>Cánh Cửa Bí Mật 🎩</h2>
+            <p>Sân khấu đã lên đèn.<br>Ai đang đứng ngoài cửa đó?</p>
+            <input type="text" id="name-input" class="passcode-input" placeholder="Tên của em..." autocomplete="off">
+            <input type="password" id="passcode-input" class="passcode-input" placeholder="Mật mã...">
+            <br><button class="kid-btn" onclick="checkPasscode()">MỞ KHÓA 🗝️</button>
+            <div class="lock-error" id="lock-error"></div>
+        </div>
+    </div>
+
+    <div class="stage-container" id="stage-bg"><div class="curtain left"></div><div class="curtain right"></div><div class="curtain-top"></div><div class="stage-floor"></div><div class="spotlight-group"><div class="spotlight left"></div><div class="spotlight center"></div><div class="spotlight right"></div></div><div class="dust-container" id="dust-container"></div></div>
+    
+    <div id="intro-screen">
+        <div class="intro-text-container" id="anim-text-container"><div class="intro-welcome">Chào xuân mới</div><div class="intro-year">2026</div></div>
+        <div class="doves-ring" id="anim-ring"><div class="intro-dove" style="--i:1;">🕊️</div><div class="intro-dove" style="--i:2;">🕊️</div><div class="intro-dove" style="--i:3;">🕊️</div><div class="intro-dove" style="--i:4;">🕊️</div><div class="intro-dove" style="--i:5;">🕊️</div><div class="intro-dove" style="--i:6;">🕊️</div><div class="intro-dove" style="--i:7;">🕊️</div><div class="intro-dove" style="--i:8;">🕊️</div><div class="intro-dove" style="--i:9;">🕊️</div><div class="intro-dove" style="--i:10;">🕊️</div></div>
+    </div>
+    
+    <div class="page active" id="page1">
+        <div id="envelope-wrapper" class="env-wrapper" onclick="openEnvelope()"><div class="env-body"><div class="env-flap"></div><div class="env-seal">🎩</div></div><div class="env-hint">Chạm để mở thư</div></div>
+        <div id="opened-letter"><div class="calling-card"><div class="card-content">Ladies and Gentlemen... 🎩<br><br>Dưới ánh đèn sân khấu đêm nay, một màn ảo thuật đặc biệt đã được chuẩn bị dành riêng cho em.<br>Không ồn ào, không náo nhiệt, chỉ có một phép màu nhỏ được cất giấu dưới lớp áo choàng này.<br><br>Người ta nói, phép màu chỉ xuất hiện khi ta tin vào nó...<br>Liệu tiểu thư có sẵn lòng trao cho tôi một nụ cười, và lật mở bí mật đêm nay? 🕊️</div><div class="btn-container"><button class="card-btn" onclick="kidAccept()">Nhận Lời ✨</button><button class="card-btn" onclick="kidReject()">Từ Chối 🙅‍♀️</button><button class="card-btn" onclick="kidConfused()">Hong Biết 🤷‍♀️</button></div><div id="kid-message-box" class="kid-message"></div></div></div>
+    </div>
+    
+    <div class="page" id="page2">
+        <div id="p2-intro"><h2>Chào mừng quý cô! 🎩✨</h2><p>Giữa hàng triệu quân bài trong bóng tối, chỉ có 4 lá bài này "tìm thấy" em. Chúng không phải là ngẫu nhiên, mà là định mệnh.<br><br>Ta đã yểm vào đó những lời chúc tốt đẹp nhất. Em có đủ can đảm lật mở bí mật dành riêng cho mình không?</p><button class="kid-btn" onclick="startMagicCards()">Tiến Hành Rút Bài 🃏</button></div>
+        <div id="cards-grid" class="cards-grid">
+            <div class="p2-card-wrapper" onclick="flipCard(this)"><div class="p2-card-inner"><div class="p2-card-front"><div class="card-mini-seal">♠️</div></div><div class="p2-card-back suit-black"><div class="card-icon" style="font-size:3.5em; margin-bottom:10px;">♠️</div><h3 class="card-title">Bình An</h3><p class="card-desc">Chúc em một năm mới tâm tĩnh lặng như mặt hồ, không vướng bận chút ưu phiền.</p></div></div></div>
+            <div class="p2-card-wrapper" onclick="flipCard(this)"><div class="p2-card-inner"><div class="p2-card-front"><div class="card-mini-seal">♥️</div></div><div class="p2-card-back suit-red"><div class="card-icon" style="font-size:3.5em; margin-bottom:10px;">♥️</div><h3 class="card-title">Hạnh Phúc</h3><p class="card-desc">Mong nụ cười rạng rỡ sẽ luôn ngự trị trên đôi môi xinh đẹp của em mỗi ngày.</p></div></div></div>
+            <div class="p2-card-wrapper" onclick="flipCard(this)"><div class="p2-card-inner"><div class="p2-card-front"><div class="card-mini-seal">♣️</div></div><div class="p2-card-back suit-black"><div class="card-icon" style="font-size:3.5em; margin-bottom:10px;">♣️</div><h3 class="card-title">May Mắn</h3><p class="card-desc">Vạn sự hanh thông, bước đi đến đâu cũng có quý nhân phù trợ.</p></div></div></div>
+            <div class="p2-card-wrapper" onclick="flipCard(this)"><div class="p2-card-inner"><div class="p2-card-front"><div class="card-mini-seal">♦️</div></div><div class="p2-card-back suit-red"><div class="card-icon" style="font-size:3.5em; margin-bottom:10px;">♦️</div><h3 class="card-title">Tỏa Sáng</h3><p class="card-desc">Hãy luôn rực rỡ và tự tin theo cách riêng của em, vì em là viên ngọc quý giá nhất.</p></div></div></div>
+        </div>
+        <button id="p2-next-btn" class="kid-btn" onclick="goToGamePage()">Tham Gia Thử Thách Lì Xì 🧧</button>
+    </div>
+
+    <div class="page" id="page3">
+        <div id="game-intro-box">
+            <h2>Cơn Mưa Lì Xì 💸</h2>
+            <p style="font-size: 1.1em; line-height: 1.6; margin-bottom: 25px;">
+                Ảo thuật gia đang rải lộc! Trong vòng <b>10 giây</b>, hãy nhanh tay chạm vào các lá bài bay lên để gom lì xì.<br><br>
+                ♦️ Thẻ thường: <b>5.000đ</b> hoặc <b>10.000đ</b><br>
+                🌟 Thẻ hào quang: <b>50.000đ</b><br><br>
+                <i>Cố gắng nhặt được càng nhiều càng tốt nhé! Sẵn sàng chưa?</i>
+            </p>
+            <button class="kid-btn" onclick="startCatchGame()">CHƠI NGAY 🚀</button>
+        </div>
+
+        <div id="game-ui">
+            <div class="game-hud"><div class="game-stats"><span id="game-timer">⏳ 10s</span><span id="game-score">💰 0đ</span></div></div>
+            <div id="game-play-area"></div>
+        </div>
+
+        <div id="game-result-box">
+            <h2>Hết Giờ! 🎩</h2>
+            <p style="font-size: 1.2em;">Tổng kết quỹ đen của quý cô:</p>
+            <h1 id="final-score-text" style="color: #00ff00; font-size: 3em; margin: 15px 0; text-shadow: 0 0 15px #00ff00;">0đ</h1>
+            <p class="tease-message" id="tease-message"></p>
+            <button class="kid-btn" onclick="goToSurprisePage()">Xem Bất Ngờ Tiếp Theo ✨</button>
+        </div>
+    </div>
+
+    <div class="page" id="page4">
+        
+        <div id="rules-overlay">
+            <div class="rules-box">
+                <h2>Căn Phòng Cuối Cùng 🃏</h2>
+                <div id="dynamic-kid-text" class="rules-desc"></div>
+                <div class="rules-items">
+                    <div class="rule-item"><span>🍭</span> <span class="rarity badge-n">N</span> <div>Kẹo Mút: <span class="money">1.000đ</span></div></div>
+                    <div class="rule-item"><span>🍘</span> <span class="rarity badge-n">N</span> <div>Bánh Tráng: <span class="money">2.000đ</span></div></div>
+                    <div class="rule-item"><span>🍟</span> <span class="rarity badge-r">R</span> <div>Bim Bim: <span class="money">5.000đ</span></div></div>
+                    <div class="rule-item"><span>🧋</span> <span class="rarity badge-sr">SR</span> <div>Trà Sữa: <span class="money">30.000đ</span></div></div>
+                    <div class="rule-item"><span>🍪</span> <span class="rarity badge-ur">UR</span> <div>Oreo: <span class="money">50.000đ</span></div></div>
+                </div>
+                <button class="kid-btn" onclick="startGachaPhase()" style="font-size: 1.1em; padding: 15px 40px; border-radius: 30px;">ĐÃ HIỂU! VÀO VIỆC ✨</button>
+            </div>
+        </div>
+
+        <div class="gacha-hud-left">
+            <span class="gacha-hud-label">SỐ LƯỢT RÚT</span>
+            <span id="pull-counter" class="gacha-hud-value">25 / 25</span>
+        </div>
+
+        <div class="side-panel panel-left">
+            <h3>🎒 Túi Đồ</h3>
+            <ul id="inventory-list"></ul>
+        </div>
+        <div class="side-panel panel-right">
+            <h3>💎 Giá Trị</h3>
+            <ul id="value-list"></ul>
+            <div class="exchange-area">
+                <div style="font-size: 0.8em; color: #e0d8c8; margin-bottom: 5px; text-transform: uppercase; font-weight: bold;">Tạm tính:</div>
+                <div class="exchange-total" id="pending-total">0đ</div>
+                <button id="btn-exchange" onclick="exchangeItems()" disabled>QUY ĐỔI 💰</button>
+            </div>
+        </div>
+
+        <div id="gacha-stage">
+            <div class="magic-hat-container">
+                <div class="magic-wand" id="magic-wand">🪄</div>
+                <div class="magic-hat" id="magic-hat">🎩</div>
+            </div>
+        </div>
+
+        <div class="action-container-gacha" id="gacha-action-container">
+            <button class="btn-gacha" id="btn-pull-1" onclick="handlePullAction(1)">RÚT 1 LÁ</button>
+            <button class="btn-gacha" id="btn-pull-5" onclick="handlePullAction(5)">RÚT 5 LÁ</button>
+            <button class="btn-gacha reveal" id="btn-reveal" style="display: none;" onclick="revealCards()">MỞ BÀI ĐI ✨</button>
+        </div>
+
+        <div id="gacha-result-box" style="display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: rgba(10, 5, 8, 0.95); padding: 40px; border-radius: 15px; border: 2px solid #d4af37; box-shadow: 0 15px 40px rgba(0,0,0,0.9); color: #fdfbf7; max-width: 480px; width: 85%; z-index: 1000; text-align: center; backdrop-filter: blur(10px);">
+            <h2 style="color: #d4af37; font-size: 2.2em; margin-top: 0; text-shadow: 0 0 15px rgba(212, 175, 55, 0.6); border-bottom: 1px dashed #d4af37; padding-bottom: 15px;">🎉 TỔNG KẾT 🎉</h2>
+            <p style="font-size: 1.2em; margin-top: 20px;">Tổng quỹ đen sau 2 trò chơi:</p>
+            <h1 id="gacha-final-score-text" style="color: #00ff00; font-size: 3.5em; margin: 10px 0; text-shadow: 0 0 20px #00ff00; font-family: monospace;">0đ</h1>
+            <p style="font-size: 1.1em; line-height: 1.6; color: #ffb6c1; font-style: italic; margin-bottom: 25px;" id="gacha-tease-text"></p>
+            <button class="kid-btn" onclick="goToNextGame()" style="font-size: 1.1em; padding: 12px 30px; background: linear-gradient(45deg, #d4af37, #f1c40f); color: #000; border: none; box-shadow: 0 0 15px rgba(212,175,55,0.6);">NHẬN 1K VÀ ĐI TIẾP ✨</button>
+        </div>
+    </div>
+
+    <div class="page" id="page5">
+        <div id="intro-challenge" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 50000; display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box;">
+            <h2 style="color: #d4af37; font-size: 2.2em; margin-bottom: 10px;">🎩 LỜI MỜI CUỐI CÙNG</h2>
+            <p style="color: #fdfbf7; font-size: 1.2em; line-height: 1.6; max-width: 500px; margin-bottom: 30px;">
+                "Chà chà... cầm <b id="final-casino-money">260.000đ</b> về thì hơi hẻo nhỉ? <br>Thấy em vất vả, đích thân Kaito Kid này sẽ mở sòng Tiến Lên Miền Nam. <br><br>
+                Thắng ván này, tiền thưởng lập tức <b style="color:#00ff00;">NHÂN ĐÔI (X2)</b>.<br>
+                Thua thì mất nửa. Dám chơi không quý cô?"
+            </p>
+            <button class="kid-btn" onclick="startCasino()" style="background: #27ae60; color: #fff; border-color: #27ae60;">CHƠI LUÔN 🃏</button>
+        </div>
+
+        <div id="tlmn-arena" style="display: none; width: 100%; height: 100%; position: relative;">
+            
+            <div class="time-skip-overlay" id="time-skip"><div class="time-skip-text">Chuẩn bị bài...</div></div>
+
+            <div id="dealing-deck">
+                <div class="hidden-card" style="box-shadow: -2px 2px 5px rgba(0,0,0,0.5);"></div>
+                <div class="hidden-card" style="position:absolute; top:-2px; left:2px;"></div>
+                <div class="hidden-card" style="position:absolute; top:-4px; left:4px;"></div>
+            </div>
+
+            <div class="tlmn-kid-zone">
+                <img src="kid.png" class="tlmn-kid-img" alt="Kid" onerror="this.src='https://api.dicebear.com/7.x/notionists/svg?seed=Kid&backgroundColor=000'">
+                <div style="font-weight:bold; color:#d4af37; font-size: 0.85em; text-transform: uppercase; letter-spacing: 1px;">Kaito Kid</div>
+                <div class="card-counter counter-kid" id="kid-counter">13 lá</div>
+                <div class="kid-hidden-cards" id="kid-hidden-cards"></div>
+            </div>
+
+            <div class="kid-dialogue-box" id="tlmn-dialogue"><p id="tlmn-kid-text"></p></div>
+            <div class="tlmn-center-board" id="tlmn-center-board"></div>
+            <div class="fraud-alert-overlay" id="fraud-alert"><button class="btn-fraud" onclick="exposeFraud()">🚨 TỐ GIÁC GIAN LẬN! 🚨</button></div>
+
+            <div class="expose-box" id="expose-box">
+                <h2 style="color: #ff0000; margin: 0;">BẮT TẨY!</h2>
+                <p style="color: white; margin: 10px 0;">Một bộ bài không thể có 2 lá Át Bích!</p>
+                <div class="expose-cards-container">
+                    <div class="expose-card-col"><div class="expose-label">Bài của Kid</div><div id="kid-fraud-card" class="expose-static-card" style="border:2px solid #ff0000; box-shadow:0 0 15px #ff0000;"></div></div>
+                    <div class="expose-card-col"><div class="expose-label" style="color: #00ff00;">Bài của Em</div><div id="player-fraud-card" class="expose-static-card" style="border:2px solid #00ff00; box-shadow:0 0 15px #00ff00;"></div></div>
+                </div>
+            </div>
+
+            <div class="card-counter counter-player" id="player-counter">13 lá</div>
+            <div class="player-hidden-cards" id="player-hidden-cards"></div>
+            <div class="player-hand-area" id="player-hand"></div>
+
+            <div class="action-btns" id="action-btns">
+                <button class="kid-btn" style="background: transparent; color: #fff; border-color: #fff;" onclick="playerPass()">BỎ LƯỢT</button>
+                <button class="kid-btn" onclick="playerPlayCard()">ĐÁNH BÀI</button>
+            </div>
+        </div>
+
+        <div id="final-farewell-box">
+            <h2 style="color: #d4af37; margin:0; font-size:2.2em; text-transform: uppercase;">🎩 THẮNG LỢI ÁP ĐẢO</h2>
+            <div style="font-size: 3.5em; color: #f1c40f; font-weight: 900; margin: 10px 0; text-shadow: 0 0 20px #f1c40f;">X2</div>
+            <p style="font-size: 1.2em; margin: 10px 0;">Tổng số tiền vào quỹ đen:</p>
+            <h1 id="x2-final-score" style="color: #00ff00; font-size: 3.5em; margin: 10px 0; text-shadow: 0 0 20px #00ff00; font-family:monospace;">520.000đ</h1>
+            <p style="font-size: 1.1em; line-height: 1.6; color: #e0d8c8; font-style: italic; margin-top: 15px;">
+                "Nani?! Ngươi giấu Át Bích kỹ thế? Khụ khụ... Chắc tại nhà sản xuất in lỗi bộ bài này rồi... Ta xin nhận thua!<br><br>
+                Tiền thưởng đã được nhân đôi. Chúc em một năm mới rực rỡ và luôn nắm giữ thế thượng phong nhé!"
+            </p>
+            
+            <div style="background: rgba(231, 76, 60, 0.15); border: 2px dashed #e74c3c; padding: 20px; border-radius: 12px; margin-top: 25px; animation: pulseBtn 2s infinite;">
+                <p style="color: #fff; font-size: 1.1em; font-weight: bold; margin: 0 0 15px 0;">📸 HÃY CHỤP MÀN HÌNH KẾT QUẢ NÀY LẠI!</p>
+                <a href="https://www.facebook.com/qnoah296" target="_blank" style="text-decoration: none;">
+                    <button class="kid-btn" style="background: linear-gradient(135deg, #2980b9, #3498db); border-color: #3498db; color: #fff; width: 100%; font-size: 1.2em;">
+                        💌 INBOX KID NHẬN LÌ XÌ NGAY
+                    </button>
+                </a>
+            </div>
+        </div>
+    </div>
+
+<script>
+    // =======================================================
+    // ⚙️ CÀI ĐẶT CƠ BẢN (THỜI GIAN, TÊN, MẬT KHẨU)
+    // =======================================================
+    const TARGET_NAME = "Đoàn Yến Nhi"; 
+    const SECRET_PASSCODE = "21112008"; 
+    // Đúng 00:00:00 ngày 18/02/2026 mới mở khóa
+    const TARGET_DATE = new Date("2026-02-17T00:00:00").getTime(); 
+
+    // --- HÀM XỬ LÝ CHỮ TIẾNG VIỆT (TRÁNH LỖI GÕ HOA THƯỜNG / CÓ DẤU) ---
+    function normalizeVietnameseString(str) {
+        if(!str) return "";
+        str = str.toLowerCase();
+        str = str.replace(/à|á|ạ|ả|ã|â|ầ|ấ|ậ|ẩ|ẫ|ă|ằ|ắ|ặ|ẳ|ẵ/g, "a");
+        str = str.replace(/è|é|ẹ|ẻ|ẽ|ê|ề|ế|ệ|ể|ễ/g, "e");
+        str = str.replace(/ì|í|ị|ỉ|ĩ/g, "i");
+        str = str.replace(/ò|ó|ọ|ỏ|õ|ô|ồ|ố|ộ|ổ|ỗ|ơ|ờ|ớ|ợ|ở|ỡ/g, "o");
+        str = str.replace(/ù|ú|ụ|ủ|ũ|ư|ừ|ứ|ự|ử|ữ/g, "u");
+        str = str.replace(/ỳ|ý|ỵ|ỷ|ỹ/g, "y");
+        str = str.replace(/đ/g, "d");
+        // Xóa các ký tự dấu kết hợp (combining accents)
+        str = str.replace(/\u0300|\u0301|\u0303|\u0309|\u0323/g, ""); 
+        str = str.replace(/\u02C6|\u0306|\u031B/g, ""); 
+        return str.trim();
+    }
+
+    // --- HỆ THỐNG ÂM THANH CHUNG ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext; const audioCtx = new AudioContext();
+    const noiseBufferSize = audioCtx.sampleRate * 2; const noiseBuffer = audioCtx.createBuffer(1, noiseBufferSize, audioCtx.sampleRate); const noiseData = noiseBuffer.getChannelData(0); for (let i = 0; i < noiseBufferSize; i++) { noiseData[i] = Math.random() * 2 - 1; }
+    
+    function playFireworkSound() { if (audioCtx.state === 'suspended') return; const osc = audioCtx.createOscillator(); const oscGain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(200, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.8); oscGain.gain.setValueAtTime(0.4, audioCtx.currentTime); oscGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8); osc.connect(oscGain); oscGain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.8); const noise = audioCtx.createBufferSource(); noise.buffer = noiseBuffer; const filter = audioCtx.createBiquadFilter(); filter.type = 'bandpass'; filter.frequency.value = 2500; const noiseGain = audioCtx.createGain(); noiseGain.gain.setValueAtTime(0.5, audioCtx.currentTime); noiseGain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 1.2); noise.connect(filter); filter.connect(noiseGain); noiseGain.connect(audioCtx.destination); noise.start(); noise.stop(audioCtx.currentTime + 1.2); }
+    function playMagicSound() { if (audioCtx.state === 'suspended') audioCtx.resume(); const notes = [800, 1000, 1200, 1600, 2000]; notes.forEach((freq, i) => { setTimeout(() => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(0.15, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 1.5); }, i * 80); }); }
+    function playSnapSound() { if (audioCtx.state === 'suspended') audioCtx.resume(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(2500, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.05); gain.gain.setValueAtTime(0.5, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.05); const noise = audioCtx.createBufferSource(); noise.buffer = noiseBuffer; const noiseFilter = audioCtx.createBiquadFilter(); noiseFilter.type = 'highpass'; noiseFilter.frequency.value = 5000; const noiseGain = audioCtx.createGain(); noiseGain.gain.setValueAtTime(0.2, audioCtx.currentTime); noiseGain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); noise.connect(noiseFilter); noiseFilter.connect(noiseGain); noiseGain.connect(audioCtx.destination); noise.start(); noise.stop(audioCtx.currentTime + 0.1); }
+    function playPopSound() { if (audioCtx.state === 'suspended') audioCtx.resume(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'triangle'; osc.frequency.setValueAtTime(300, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.1); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.1); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.1); }
+    function playFlipSound() { if (audioCtx.state === 'suspended') return; const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(250, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(40, audioCtx.currentTime + 0.2); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.2); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.2); }
+    function playGachaSound(type) { if (audioCtx.state === 'suspended') audioCtx.resume(); const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); if (type === 'wand') { osc.type = 'sine'; osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1500, audioCtx.currentTime + 0.3); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.linearRampToValueAtTime(0, audioCtx.currentTime + 0.3); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.3); } else if (type === 'rumble') { osc.type = 'sawtooth'; osc.frequency.setValueAtTime(50, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.6); gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.6); } }
+    function playWinSound(isRare) { if (audioCtx.state === 'suspended') audioCtx.resume(); const notes = isRare ? [600, 800, 1000, 1200, 1500] : [500, 750]; notes.forEach((freq, i) => { setTimeout(() => { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'sine'; osc.frequency.setValueAtTime(freq, audioCtx.currentTime); gain.gain.setValueAtTime(0.2, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }, i * 100); }); }
+    function playSiren() { if (audioCtx.state === 'suspended') audioCtx.resume(); let time = audioCtx.currentTime; for(let i=0; i<6; i++) { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.type = 'square'; osc.frequency.setValueAtTime(600, time); osc.frequency.linearRampToValueAtTime(800, time + 0.25); osc.frequency.linearRampToValueAtTime(600, time + 0.5); gain.gain.setValueAtTime(0.3, time); gain.gain.setValueAtTime(0.3, time + 0.4); gain.gain.linearRampToValueAtTime(0, time + 0.5); osc.connect(gain); gain.connect(audioCtx.destination); osc.start(time); osc.stop(time + 0.5); time += 0.5; } }
+
+    const playPop = playPopSound; const playFlip = playFlipSound; const playSnap = playSnapSound;
+
+    // =======================================================
+    // --- HỆ THỐNG PHÁO HOA CHUNG ---
+    // =======================================================
+    const canvas = document.getElementById('fireworksCanvas'); const ctx = canvas.getContext('2d'); canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+    let particles = []; const cardSuits = ['♠', '♥', '♦', '♣', '🃏', '✨']; const cardColors = ['#fbd3d9', '#d4af37', '#ffffff']; 
+    class CardParticle { constructor(x, y) { this.x = x; this.y = y; this.symbol = cardSuits[Math.floor(Math.random() * cardSuits.length)]; this.color = cardColors[Math.floor(Math.random() * cardColors.length)]; this.fontSize = Math.random() * 18 + 12; const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 5 + 2; this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed; this.alpha = 1; this.decay = Math.random() * 0.015 + 0.005; this.rotation = Math.random() * 360; this.rotSpeed = (Math.random() - 0.5) * 8; } update() { this.vx *= 0.92; this.vy *= 0.92; this.vy += 0.05; this.x += this.vx; this.y += this.vy; this.alpha -= this.decay; this.rotation += this.rotSpeed; } draw() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.translate(this.x, this.y); ctx.rotate(this.rotation * Math.PI / 180); ctx.font = this.fontSize + "px Arial"; ctx.fillStyle = this.color; ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(this.symbol, 0, 0); ctx.restore(); } } 
+    class SparkParticle { constructor(x, y) { this.x = x; this.y = y; this.radius = Math.random() * 3 + 1.5; const sparkColors = ['#ffdf00', '#ffffff', '#ff69b4', '#00ffff']; this.color = sparkColors[Math.floor(Math.random() * sparkColors.length)]; const angle = Math.random() * Math.PI * 2; const speed = Math.random() * 8 + 3; this.vx = Math.cos(angle) * speed; this.vy = Math.sin(angle) * speed; this.alpha = 1; this.decay = Math.random() * 0.03 + 0.01; } update() { this.vx *= 0.94; this.vy *= 0.94; this.vy += 0.05; this.x += this.vx; this.y += this.vy; this.alpha -= this.decay; } draw() { ctx.save(); ctx.globalAlpha = this.alpha; ctx.beginPath(); ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2); ctx.fillStyle = this.color; ctx.fill(); ctx.shadowBlur = 15; ctx.shadowColor = this.color; ctx.restore(); } }
+    function animateFireworks() { ctx.clearRect(0, 0, canvas.width, canvas.height); particles = particles.filter(p => p.alpha > 0); particles.forEach(p => { p.update(); p.draw(); }); requestAnimationFrame(animateFireworks); } 
+    window.addEventListener('resize', () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }); animateFireworks(); 
+
+    function createMixedFirework(x, y) { playFireworkSound(); for (let i=0; i<20; i++) particles.push(new CardParticle(x, y)); for (let i=0; i<30; i++) particles.push(new SparkParticle(x, y)); }
+    function formatCurrency(amount) { return amount.toLocaleString('vi-VN') + "đ"; }
+
+    // =======================================================
+    // --- XỬ LÝ KHÓA (PASSCODE CHUẨN) ---
+    // =======================================================
+    function checkPasscode() {
+        const rawNameVal = document.getElementById('name-input').value; 
+        
+        // Chuẩn hóa tên nhập vào và tên gốc để so sánh chính xác tuyệt đối
+        const inputNameVal = normalizeVietnameseString(rawNameVal);
+        const targetNameVal = normalizeVietnameseString(TARGET_NAME);
+        const inputPassVal = document.getElementById('passcode-input').value; 
+        
+        const errorText = document.getElementById('lock-error'); 
+        const lockBox = document.getElementById('lock-box');
+
+        // BẮT BUỘC PHẢI ĐÚNG 00:00:00 NGÀY 18/02/2026 MỚI VÀO ĐƯỢC
+        if (new Date().getTime() < TARGET_DATE) { 
+            playPopSound(); 
+            errorText.innerText = "Chưa đến thời khắc quyết định!\nHẹn quý cô vào đúng 00:00 ngày 18/02/2026 nhé... ⏳"; 
+            lockBox.classList.add('shake-animation'); 
+            setTimeout(() => lockBox.classList.remove('shake-animation'), 400); 
+            return; 
+        }
+
+        if (inputNameVal === targetNameVal && inputPassVal === SECRET_PASSCODE) {
+            playSnapSound(); document.getElementById('lock-screen').style.opacity = '0';
+            
+            // Xử lý viết hoa chữ cái đầu cho đẹp
+            let displayString = rawNameVal.trim() ? rawNameVal.trim().replace(/\w\S*/g, (txt) => txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase()) : TARGET_NAME;
+            document.getElementById('profile-name').innerText = displayString;
+            
+            document.getElementById('user-profile-widget').classList.add('show');
+            const bgMusic = document.getElementById('bgMusic'); bgMusic.volume = 0.6; bgMusic.play().catch(e=>console.log("Lỗi nhạc"));
+            setTimeout(() => { document.getElementById('lock-screen').style.display = 'none'; startIntro(); }, 800);
+        } else { 
+            playPopSound(); 
+            errorText.innerText = "Sai mật mã hoặc tên khách mời rồi! 🧐"; 
+            lockBox.classList.add('shake-animation'); 
+            setTimeout(() => lockBox.classList.remove('shake-animation'), 400); 
+        }
+    }
+    document.getElementById('name-input').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkPasscode(); }); document.getElementById('passcode-input').addEventListener('keypress', function (e) { if (e.key === 'Enter') checkPasscode(); });
+
+    function startIntro() { const introScreen = document.getElementById('intro-screen'); introScreen.style.display = 'flex'; document.getElementById('anim-text-container').classList.add('run-intro-text'); document.getElementById('anim-ring').classList.add('run-doves-ring'); setTimeout(() => createMixedFirework(window.innerWidth/2, window.innerHeight/2), 100); setTimeout(() => createMixedFirework(window.innerWidth/3, window.innerHeight/2.5), 600); setTimeout(() => createMixedFirework(window.innerWidth*0.66, window.innerHeight/2.2), 1100); setTimeout(() => { introScreen.style.opacity = '0'; setTimeout(() => introScreen.style.display = 'none', 1000); document.getElementById('envelope-wrapper').classList.add('run-envelope'); }, 4500); }
+    function openEnvelope() { playMagicSound(); document.getElementById('envelope-wrapper').classList.add('env-hide'); setTimeout(() => document.getElementById('opened-letter').classList.add('show'), 400); }
+    let messageTimeout; function showKidMessage(text) { const msgBox = document.getElementById('kid-message-box'); msgBox.innerText = text; msgBox.style.opacity = '1'; msgBox.style.transform = 'translateY(0)'; clearTimeout(messageTimeout); messageTimeout = setTimeout(() => { msgBox.style.opacity = '0'; msgBox.style.transform = 'translateY(10px)'; }, 3500); }
+    function kidReject() { playSnapSound(); showKidMessage("Ảo thuật gia không chấp nhận sự từ chối! Vở diễn đã bắt đầu rồi~ 🃏"); }
+    function kidConfused() { playSnapSound(); showKidMessage("Sự tò mờ là khởi nguồn của phép màu. Nhấn 'Nhận Lời' đi nào! 🎩"); }
+    function kidAccept() { playSnapSound(); setTimeout(() => playMagicSound(), 200); setTimeout(() => { document.getElementById('page1').classList.remove('active'); document.getElementById('page2').classList.add('active'); }, 800); }
+    let flippedCardsCount = 0; function startMagicCards() { playSnapSound(); document.getElementById('p2-intro').style.display = 'none'; setTimeout(() => { playMagicSound(); const grid = document.getElementById('cards-grid'); grid.style.display = 'flex'; grid.querySelectorAll('.p2-card-wrapper').forEach((card, i) => card.style.animationDelay = (i * 0.15) + 's'); }, 300); }
+    function flipCard(el) { if(!el.classList.contains('flipped')) { playFlipSound(); el.classList.add('flipped'); flippedCardsCount++; if(flippedCardsCount === 4) { setTimeout(() => { document.getElementById('p2-next-btn').style.display = 'block'; playMagicSound(); }, 1000); } } }
+    function goToGamePage() { playSnapSound(); setTimeout(() => playMagicSound(), 200); setTimeout(() => { document.getElementById('page2').classList.remove('active'); document.getElementById('page3').classList.add('active'); }, 800); }
+
+    let currentScore = 0; let timeLeft = 10; let gameTimerId; let spawnerId; let count50k = 0; 
+    function updateProfileBalance(amount) { document.getElementById('profile-balance').innerText = formatCurrency(amount); const pb = document.getElementById('profile-balance'); pb.style.textShadow = "0 0 15px #00ff00"; pb.style.transform = "scale(1.2)"; setTimeout(() => { pb.style.textShadow = "0 0 5px rgba(0, 255, 0, 0.5)"; pb.style.transform = "scale(1)"; }, 200); }
+    function startCatchGame() { playSnapSound(); document.getElementById('bgMusic').pause(); document.getElementById('gameMusic').volume = 0.8; document.getElementById('gameMusic').play().catch(e=>console.log("Lỗi nhạc game")); document.getElementById('game-intro-box').style.display = 'none'; document.getElementById('game-ui').style.display = 'block'; currentScore = 0; timeLeft = 10; count50k = 0; document.getElementById('game-score').innerText = `💰 0đ`; updateProfileBalance(currentScore); gameTimerId = setInterval(() => { timeLeft--; document.getElementById('game-timer').innerText = `⏳ ${timeLeft}s`; if(timeLeft <= 0) endGame(); }, 1000); spawnerId = setInterval(spawnFallingCard, 350); }
+    
+    function spawnFallingCard() { 
+        const playArea = document.getElementById('game-play-area'); const card = document.createElement('div'); card.className = 'falling-card'; card.style.left = `${Math.random() * 80 + 5}%`; const duration = Math.random() * 1.5 + 2.5; card.style.animationDuration = `${duration}s`; let value = 5000; let r = Math.random(); 
+        if (currentScore >= 160000) { value = 5000; } else { if (r > 0.95 && count50k < 1) { value = 50000; count50k++; card.classList.add('rare-card'); } else if (r > 0.70) { value = 10000; } } 
+        card.ontouchstart = (e) => catchCard(e, card, value); card.onmousedown = (e) => catchCard(e, card, value); playArea.appendChild(card); setTimeout(() => { if (card.parentNode) card.remove(); }, duration * 1000); 
+    }
+    
+    function catchCard(e, cardEl, value) { 
+        e.preventDefault(); if (cardEl.dataset.caught === "true") return; cardEl.dataset.caught = "true"; playPopSound(); 
+        if (currentScore + value > 250000) { value = 250000 - currentScore; } 
+        const ft = document.createElement('div'); if (value === 0) { ft.className = `floating-money zero`; ft.innerText = `+0đ`; } else { ft.className = `floating-money ${value >= 50000 ? 'rare' : ''}`; ft.innerText = `+${formatCurrency(value)}`; } const cX = e.touches ? e.touches[0].clientX : e.clientX; const cY = e.touches ? e.touches[0].clientY : e.clientY; ft.style.left = `${cX - 30}px`; ft.style.top = `${cY - 30}px`; document.body.appendChild(ft); setTimeout(() => ft.remove(), 800); cardEl.style.display = 'none'; 
+        currentScore += value; document.getElementById('game-score').innerText = `💰 ${formatCurrency(currentScore)}`; updateProfileBalance(currentScore); 
+    }
+    
+    function endGame() { 
+        clearInterval(gameTimerId); clearInterval(spawnerId); playMagicSound(); 
+        document.getElementById('gameMusic').pause(); document.getElementById('game-play-area').innerHTML = ''; 
+        document.getElementById('game-ui').style.display = 'none'; document.getElementById('game-result-box').style.display = 'block'; 
+        document.getElementById('final-score-text').innerText = formatCurrency(currentScore); 
+
+        const teaseEl = document.getElementById('tease-message');
+        if (currentScore < 200000) {
+            teaseEl.innerHTML = `Chà chà... Ta biết ngay kiểu gì em cũng chỉ lụm được dưới 200 cành mà 😏.<br>Nhưng đừng buồn, vì Siêu Đạo Chích luôn có phương án dự phòng. Hãy tiến vào căn phòng ma thuật cuối cùng...`;
+        } else {
+            teaseEl.innerHTML = `Ây da... Tay ải tay ai mà nhặt lộc ghê thế này! Khá khen cho quý cô 👏.<br>Nhưng đây chưa phải là tất cả. Hãy tiến vào căn phòng ma thuật cuối cùng...`;
+        }
+    }
+
+    // =======================================================
+    // --- PAGE 4: GACHA MASTERPIECE ---
+    // =======================================================
+    function goToSurprisePage() {
+        playSnapSound(); setTimeout(() => playMagicSound(), 200); 
+        setTimeout(() => { 
+            document.getElementById('page3').classList.remove('active'); 
+            document.getElementById('page4').classList.add('active'); 
+            document.getElementById('stage-bg').style.display = 'none';
+            
+            document.getElementById('dynamic-kid-text').innerHTML = 
+                `Ngươi vừa gom được <b>${formatCurrency(currentScore)}</b> đúng không?<br>
+                Được rồi, ta sẽ giữ nguyên số tiền này làm vốn Gacha cho em.<br>
+                Ta có <b>25 lượt rút</b> từ chiếc mũ này. Nhớ bấm <b>QUY ĐỔI</b> để gom lộc nhé!`;
+
+            initGachaPhase();
+        }, 800); 
+    }
+
+    const GACHA_MAGIC_EMOJIS = ['🕊️', '🃏', '✨', '🌟'];
+    function createGachaParticles(x, y, isWand = false) { const count = isWand ? 12 : 25; for(let i=0; i<count; i++) { let particle = document.createElement('div'); const emoji = GACHA_MAGIC_EMOJIS[Math.floor(Math.random() * GACHA_MAGIC_EMOJIS.length)]; particle.innerText = emoji; particle.className = 'magic-particle'; if(emoji === '🃏') particle.classList.add('particle-card'); particle.style.left = x + 'px'; particle.style.top = y + 'px'; let angle = Math.random() * Math.PI * 2; let distance = isWand ? Math.random() * 80 + 30 : Math.random() * 150 + 50; let tx = Math.cos(angle) * distance; let ty = Math.sin(angle) * distance; let endRot = (Math.random() * 360 - 180) + 'deg'; particle.animate([ { transform: 'translate(0,0) scale(0.5) rotate(0deg)', opacity: 1 }, { transform: `translate(${tx}px, ${ty}px) scale(1.5) rotate(${endRot})`, opacity: 0 } ], { duration: isWand ? 700 : 1200, easing: 'cubic-bezier(0, .9, .57, 1)' }); document.body.appendChild(particle); setTimeout(() => particle.remove(), 1200); } }
+    function spawnDoves() { const stage = document.getElementById('gacha-stage'); for(let d=0; d<3; d++) { let dove = document.createElement('div'); dove.innerText = '🕊️'; dove.className = 'magic-dove'; let tx = (Math.random() - 0.5) * 400; let ty = -(Math.random() * 400 + 400); let rot = (tx > 0) ? 20 : -20; dove.style.setProperty('--tx', tx + 'px'); dove.style.setProperty('--ty', ty + 'px'); dove.style.setProperty('--rot', rot + 'deg'); stage.appendChild(dove); setTimeout(() => dove.remove(), 1500); } }
+
+    let gachaTotalScore = 0; 
+    let gachaPullsLeft = 25;
+    let pendingExchangeValue = 0;
+    let userInventory = { 50000: 0, 30000: 0, 5000: 0, 2000: 0, 1000: 0 };
+
+    const ITEM_DB = {
+        50000: { name: "Oreo", icon: "🍪", rarity: "UR", rClass: "rarity-ur", badge: "badge-ur" },
+        30000: { name: "Trà Sữa", icon: "🧋", rarity: "SR", rClass: "rarity-sr", badge: "badge-sr" },
+        5000:  { name: "Bim Bim", icon: "🍟", rarity: "R", rClass: "rarity-r", badge: "badge-r" },
+        2000:  { name: "Bánh Tráng", icon: "🍘", rarity: "N", rClass: "rarity-n", badge: "badge-n" },
+        1000:  { name: "Kẹo Mút", icon: "🍭", rarity: "N", rClass: "rarity-n", badge: "badge-n" }
+    };
+    const STANDARD_SUITS = [ { symbol: '♠', color: '#1a0f0f' }, { symbol: '♥', color: '#c0392b' }, { symbol: '♦', color: '#c0392b' }, { symbol: '♣', color: '#1a0f0f' } ];
+    let gachaPool = [];
+
+    function generateRiggedPool(startMoney) {
+        let targetSum = 259000 - startMoney;
+        let pool = Array(25).fill(1000); 
+        let deficit = targetSum - 25000;
+        
+        for (let i = 0; i < 25; i++) {
+            if (deficit >= 49000) { pool[i] = 50000; deficit -= 49000; }
+            else if (deficit >= 29000) { pool[i] = 30000; deficit -= 29000; }
+            else if (deficit >= 4000) { pool[i] = 5000; deficit -= 4000; }
+            else if (deficit >= 1000) { pool[i] = 2000; deficit -= 1000; }
+        }
+        pool.sort(() => Math.random() - 0.5);
+        return pool;
+    }
+
+    function initGachaPhase() {
+        // Dừng nhạc nền chính và nhạc game, phát nhạc Gacha
+        document.getElementById('bgMusic').pause();
+        document.getElementById('gameMusic').pause();
+        const gachaMusic = document.getElementById('gachaMusic');
+        gachaMusic.volume = 0.8;
+        gachaMusic.play().catch(e=>console.log("Lỗi nhạc Gacha"));
+
+        document.getElementById('rules-overlay').style.display = 'flex';
+        setTimeout(() => document.getElementById('rules-overlay').style.opacity = '1', 50);
+        
+        gachaTotalScore = currentScore;
+        updateProfileBalance(gachaTotalScore); 
+        gachaPool = generateRiggedPool(gachaTotalScore);
+        renderPanels();
+    }
+
+    function startGachaPhase() {
+        playSnapSound();
+        const overlay = document.getElementById('rules-overlay'); overlay.style.opacity = '0';
+        setTimeout(() => { overlay.style.display = 'none'; document.getElementById('gacha-action-container').style.display = 'flex'; updateGachaButtons(); }, 800);
+    }
+
+    function renderPanels() {
+        const invList = document.getElementById('inventory-list'); const valList = document.getElementById('value-list');
+        invList.innerHTML = ''; valList.innerHTML = ''; pendingExchangeValue = 0;
+
+        [50000, 30000, 5000, 2000, 1000].forEach(key => {
+            const count = userInventory[key]; const item = ITEM_DB[key]; const totalVal = count * key;
+            pendingExchangeValue += totalVal;
+            if(count > 0) {
+                invList.innerHTML += `<li><span>${item.icon} ${item.name}</span> <span class="val-count">x${count}</span></li>`;
+                valList.innerHTML += `<li><span>${item.icon}</span> <span class="val-money">${formatCurrency(totalVal)}</span></li>`;
+            }
+        });
+        if(pendingExchangeValue === 0) {
+            invList.innerHTML = `<li style="justify-content:center; color:#888; border:none; background:transparent;">(Chưa có lộc)</li>`;
+            valList.innerHTML = `<li style="justify-content:center; color:#888; border:none; background:transparent;">(Trống)</li>`;
+        }
+        document.getElementById('pending-total').innerText = formatCurrency(pendingExchangeValue);
+        const btnEx = document.getElementById('btn-exchange');
+        if(pendingExchangeValue > 0) { btnEx.disabled = false; btnEx.classList.add('active-exchange'); } 
+        else { btnEx.disabled = true; btnEx.classList.remove('active-exchange'); }
+    }
+
+    function exchangeItems() {
+        if (pendingExchangeValue <= 0) return; playWinSound(true);
+        const rightPanel = document.querySelector('.panel-right').getBoundingClientRect(); 
+        const avatarWidget = document.getElementById('user-profile-widget').getBoundingClientRect();
+        
+        const flyingText = document.createElement('div'); flyingText.innerText = `+${formatCurrency(pendingExchangeValue)}`;
+        flyingText.style.position = 'absolute'; flyingText.style.color = '#00ff00'; flyingText.style.fontWeight = 'bold'; flyingText.style.fontSize = '2.5em'; flyingText.style.zIndex = '15000'; flyingText.style.textShadow = '0 0 15px #00ff00, 0 0 30px #00ff00';
+        flyingText.style.left = (rightPanel.left) + 'px'; flyingText.style.top = rightPanel.top + 'px'; document.body.appendChild(flyingText);
+        
+        flyingText.animate([ { transform: 'translate(0, 0) scale(1)', opacity: 1 }, { transform: `translate(${avatarWidget.left - rightPanel.left}px, ${avatarWidget.top - rightPanel.top}px) scale(0.5)`, opacity: 0 } ], { duration: 900, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' });
+        
+        setTimeout(() => {
+            flyingText.remove(); gachaTotalScore += pendingExchangeValue; 
+            updateProfileBalance(gachaTotalScore); 
+            for(let key in userInventory) userInventory[key] = 0; renderPanels(); updateGachaButtons(); 
+        }, 800);
+    }
+
+    let isGachaAnimating = false; let activeCards = []; 
+
+    function updateGachaButtons() {
+        if (gachaPullsLeft === 0 && activeCards.length === 0 && pendingExchangeValue === 0) {
+            document.getElementById('btn-pull-1').style.display = 'none'; document.getElementById('btn-pull-5').style.display = 'none';
+            showFinalResult(); return;
+        }
+        if (gachaPullsLeft > 0 && activeCards.length === 0) {
+            document.getElementById('btn-pull-1').style.display = 'block'; document.getElementById('btn-pull-5').style.display = 'block'; document.getElementById('btn-pull-5').disabled = gachaPullsLeft < 5;
+        }
+    }
+
+    function handlePullAction(numPulls) {
+        if (isGachaAnimating || gachaPullsLeft < numPulls) return; isGachaAnimating = true;
+        document.getElementById('btn-pull-1').style.display = 'none'; document.getElementById('btn-pull-5').style.display = 'none';
+        gachaPullsLeft -= numPulls; document.getElementById('pull-counter').innerText = `${gachaPullsLeft} / 25`;
+
+        const hat = document.getElementById('magic-hat'); const wand = document.getElementById('magic-wand'); const stage = document.getElementById('gacha-stage');
+        let pulledItems = []; for(let i=0; i<numPulls; i++) pulledItems.push(gachaPool.pop()); 
+
+        wand.classList.add('wand-lifting');
+        let wandMagicInterval = setInterval(() => { const wandRect = wand.getBoundingClientRect(); createGachaParticles(wandRect.left + wandRect.width*0.2, wandRect.top + wandRect.height*0.2, true); playGachaSound('wand'); }, 150);
+
+        setTimeout(() => {
+            clearInterval(wandMagicInterval); playGachaSound('rumble'); hat.classList.add('hat-rumbling');
+
+            setTimeout(() => {
+                hat.classList.remove('hat-rumbling'); wand.classList.remove('wand-lifting'); spawnDoves();
+                activeCards = [];
+                const cardWidth = 120; const gap = 15; let totalNeededWidth = numPulls * cardWidth + (numPulls - 1) * gap; let availableWidth = window.innerWidth * 0.95; let scaleFactor = 1; let spacing = cardWidth + gap;
+                if (totalNeededWidth > availableWidth) { scaleFactor = availableWidth / totalNeededWidth; spacing = (availableWidth / numPulls); }
+
+                for(let i=0; i<numPulls; i++) {
+                    const val = pulledItems[i]; const itemData = ITEM_DB[val]; const randomSuit = STANDARD_SUITS[Math.floor(Math.random() * STANDARD_SUITS.length)];
+                    const cardWrap = document.createElement('div'); cardWrap.className = 'gacha-card-wrapper';
+                    
+                    cardWrap.innerHTML = `
+                        <div class="gacha-card-inner">
+                            <div class="gacha-card-face gacha-card-front"><div class="card-suit-back" style="color: ${randomSuit.color}">${randomSuit.symbol}</div></div>
+                            <div class="gacha-card-face gacha-card-back ${itemData.rClass}">
+                                <div class="card-back-content">
+                                    <div class="card-rarity-badge ${itemData.badge}">${itemData.rarity}</div>
+                                    <div class="card-icon-emoji">${itemData.icon}</div>
+                                    <div class="card-item-name">${itemData.name}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    stage.appendChild(cardWrap);
+                    let offset = (numPulls === 1) ? 0 : (i - (numPulls - 1) / 2); let finalX = offset * spacing; let finalY = -30; let finalRot = 720; 
+                    cardWrap.animate([ { transform: `translateY(50px) scale(0.2) rotate(180deg)`, opacity: 1 }, { transform: `translate(${finalX * 1.5}px, -45vh) scale(${scaleFactor * 1.2}) rotate(540deg)`, opacity: 1 }, { transform: `translate(${finalX}px, ${finalY}vh) scale(${scaleFactor}) rotate(${finalRot}deg)`, opacity: 1 } ], { duration: 1000 + i * 120, easing: 'cubic-bezier(0.1, 0.8, 0.2, 1)', fill: 'forwards' });
+                    activeCards.push({ element: cardWrap, value: val });
+                }
+                setTimeout(() => { document.getElementById('btn-reveal').style.display = 'block'; isGachaAnimating = false; }, 1200 + numPulls * 120); 
+            }, 600); 
+        }, 800); 
+    }
+
+    function revealCards() {
+        if (isGachaAnimating) return; isGachaAnimating = true; document.getElementById('btn-reveal').style.display = 'none';
+        activeCards.forEach((cardObj, index) => {
+            setTimeout(() => {
+                playFlipSound(); cardObj.element.classList.add('flipped'); const rect = cardObj.element.getBoundingClientRect();
+                setTimeout(() => {
+                    createGachaParticles(rect.left + rect.width/2, rect.top + rect.height/2);
+                    if (cardObj.value >= 30000) playWinSound(true); else playWinSound(false);
+                    userInventory[cardObj.value] += 1; renderPanels(); 
+                }, 350);
+            }, index * 350); 
+        });
+        setTimeout(() => {
+            setTimeout(() => { activeCards.forEach(c => c.element.remove()); activeCards = []; isGachaAnimating = false; updateGachaButtons(); }, 2500); 
+        }, activeCards.length * 350 + 500);
+    }
+
+    function showFinalResult() {
+        document.getElementById('gacha-result-box').style.display = 'block';
+        document.getElementById('gacha-final-score-text').innerText = formatCurrency(gachaTotalScore); 
+        
+        document.getElementById('gacha-tease-text').innerHTML = 
+            `Kaito Kid: "Chà chà... Chơi cả 2 trò bở hơi tai mà tổng số tiền vẫn chưa được 300 cành sao? Trông tội nghiệp quá. Thôi để cho con số nó đẹp, ta sẽ đặc cách lì xì thêm cho em <b>1.000đ</b> nhé! 😏"`;
+
+        playMagicSound();
+        for(let i=0; i<8; i++) { setTimeout(() => createMixedFirework(window.innerWidth * Math.random(), window.innerHeight * Math.random()), i * 300); }
+    }
+
+    // --- CHUYỂN GIAO SANG CASINO P5 ---
+    function goToNextGame() {
+        playSnapSound();
+        // Dừng nhạc Gacha
+        document.getElementById('gachaMusic').pause();
+
+        gachaTotalScore += 1000; 
+        updateProfileBalance(gachaTotalScore);
+        
+        const btnRect = document.querySelector('#gacha-result-box button').getBoundingClientRect();
+        const avatarWidget = document.getElementById('user-profile-widget').getBoundingClientRect();
+        const flyingText = document.createElement('div');
+        flyingText.innerText = `+1.000đ`;
+        flyingText.style.cssText = `position: absolute; color: #00ff00; font-weight: bold; font-size: 2em; z-index: 20000; text-shadow: 0 0 10px #00ff00; left: ${btnRect.left}px; top: ${btnRect.top}px;`;
+        document.body.appendChild(flyingText);
+        flyingText.animate([ 
+            { transform: 'translate(0, 0) scale(1)', opacity: 1 }, 
+            { transform: `translate(${avatarWidget.left - btnRect.left}px, ${avatarWidget.top - btnRect.top}px) scale(0.5)`, opacity: 0 } 
+        ], { duration: 800, easing: 'cubic-bezier(0.25, 1, 0.5, 1)' });
+
+        setTimeout(() => {
+            flyingText.remove();
+            document.getElementById('page4').classList.remove('active');
+            
+            // Set số tiền để khịa bên P5
+            document.getElementById('final-casino-money').innerText = formatCurrency(gachaTotalScore);
+            
+            document.getElementById('page5').classList.add('active'); // Bật Page 5
+        }, 700);
+    }
+
+    // =======================================================
+    // --- PAGE 5: SÒNG BÀI CASINO TIẾN LÊN MIỀN NAM ---
+    // =======================================================
+    function createCardHTML(val, suit, color) { return `<div class="card-top-left" style="color:${color}">${val}<br>${suit}</div><div class="center-suit" style="color:${color}">${suit}</div><div class="card-bottom-right" style="color:${color}">${val}<br>${suit}</div>`; }
+
+    let tlmnState = 0; 
+    let kidCardCount = 0;
+    let playerCardCount = 0;
+
+    const playerHandData = [
+        { v: '3', s: '♣', c: '#2c3e50', id: '3C' },
+        { v: '5', s: '♠', c: '#2c3e50', id: '5S' },
+        { v: '5', s: '♥', c: '#c0392b', id: '5H' },
+        { v: '7', s: '♦', c: '#c0392b', id: '7D' },
+        { v: '8', s: '♣', c: '#2c3e50', id: '8C' },
+        { v: '9', s: '♠', c: '#2c3e50', id: '9S' },
+        { v: '10', s: '♥', c: '#c0392b', id: '10H' },
+        { v: 'J', s: '♦', c: '#c0392b', id: 'JD' },
+        { v: 'Q', s: '♣', c: '#2c3e50', id: 'QC' },
+        { v: 'K', s: '♠', c: '#2c3e50', id: 'KS' },
+        { v: 'K', s: '♦', c: '#c0392b', id: 'KD' },
+        { v: 'A', s: '♠', c: '#2c3e50', id: 'AS' },
+        { v: '2', s: '♥', c: '#c0392b', id: '2H' }
+    ];
+
+    function startCasino() {
+        document.getElementById('intro-challenge').style.display = 'none';
+        document.getElementById('tlmn-arena').style.display = 'flex';
+        document.getElementById('time-skip').classList.add('show');
+        
+        setTimeout(() => {
+            document.getElementById('time-skip').classList.remove('show');
+            startDealingAnimation();
+        }, 1500); 
+    }
+
+    function startDealingAnimation() {
+        const deck = document.getElementById('dealing-deck');
+        deck.style.display = 'block';
+        const kidHand = document.getElementById('kid-hidden-cards');
+        const pFaceDownHand = document.getElementById('player-hidden-cards');
+        
+        kidHand.innerHTML = ''; 
+        pFaceDownHand.innerHTML = '';
+
+        let dealCount = 0;
+        const dealInterval = setInterval(() => {
+            if (dealCount >= 13) {
+                clearInterval(dealInterval);
+                deck.style.display = 'none';
+                
+                document.getElementById('kid-counter').style.display = 'block';
+                document.getElementById('player-counter').style.display = 'block';
+                updatePlayerCount(13);
+                
+                setTimeout(() => {
+                    playSnap();
+                    pFaceDownHand.style.display = 'none'; 
+                    renderRealPlayerHand(); 
+                    
+                    setTimeout(() => {
+                        document.getElementById('tlmn-dialogue').classList.add('show');
+                        kidPlaysCards([
+                            { v: '3', s: '♦', c: '#c0392b' }, { v: '4', s: '♣', c: '#2c3e50' },
+                            { v: '5', s: '♦', c: '#c0392b' }, { v: '6', s: '♦', c: '#c0392b' },
+                            { v: '7', s: '♥', c: '#c0392b' }
+                        ], `"Khởi động sương sương bằng cái Sảnh 5 (3-4-5-6-7) nhé!"`);
+                        
+                        tlmnState = 1;
+                        document.getElementById('action-btns').style.display = 'flex';
+                    }, 1500);
+                }, 800);
+                return;
+            }
+
+            playFlip(); 
+            const kCard = document.createElement('div');
+            kCard.className = 'hidden-card dealing-fly-card';
+            document.body.appendChild(kCard);
+            kCard.animate([
+                { transform: 'translate(-50%, -50%) scale(1)' },
+                { transform: 'translate(-50%, -35vh) scale(0.6)', opacity: 0 }
+            ], { duration: 150, easing: 'ease-out' }).onfinish = () => {
+                kCard.remove();
+                kidCardCount++;
+                kidHand.innerHTML += '<div class="hidden-card"></div>';
+                document.getElementById('kid-counter').innerText = `${kidCardCount} lá`;
+            };
+
+            setTimeout(() => {
+                playFlip();
+                const pCard = document.createElement('div');
+                pCard.className = 'hidden-card dealing-fly-card';
+                document.body.appendChild(pCard);
+                pCard.animate([
+                    { transform: 'translate(-50%, -50%) scale(1)' },
+                    { transform: 'translate(-50%, 35vh) scale(1.5)', opacity: 0 }
+                ], { duration: 150, easing: 'ease-out' }).onfinish = () => {
+                    pCard.remove();
+                    pFaceDownHand.innerHTML += '<div class="hidden-card"></div>';
+                };
+            }, 75);
+
+            dealCount++;
+        }, 150);
+    }
+
+    function renderRealPlayerHand() {
+        const pHand = document.getElementById('player-hand');
+        playerHandData.forEach(card => {
+            const c = document.createElement('div');
+            c.className = `tlmn-card ${card.c === '#c0392b' ? 'suit-red' : 'suit-black'}`;
+            c.setAttribute('data-id', card.id);
+            c.onclick = function() { toggleCard(this) };
+            c.innerHTML = createCardHTML(card.v, card.s, card.c);
+            pHand.appendChild(c);
+        });
+        pHand.classList.add('show');
+    }
+
+    function updateKidHand(count) {
+        kidCardCount = count;
+        document.getElementById('kid-counter').innerText = `${kidCardCount} lá`;
+        const kh = document.getElementById('kid-hidden-cards');
+        kh.innerHTML = '';
+        for(let i=0; i<count; i++) kh.innerHTML += '<div class="hidden-card"></div>';
+    }
+
+    function updatePlayerCount(count) {
+        playerCardCount = count;
+        document.getElementById('player-counter').innerText = `${playerCardCount} lá`;
+    }
+
+    function toggleCard(cardEl) {
+        if(tlmnState === 5 || tlmnState === 6) return; 
+        
+        const val = cardEl.getAttribute('data-id');
+
+        if (tlmnState === 1 && ['7D', '8C', '9S', '10H', 'JD'].includes(val)) {
+            selectCombo(['7D', '8C', '9S', '10H', 'JD']); return;
+        }
+        if (tlmnState === 2 && ['5S', '5H'].includes(val)) {
+            selectCombo(['5S', '5H']); return;
+        }
+        if (tlmnState === 3 && ['KS', 'KD'].includes(val)) {
+            selectCombo(['KS', 'KD']); return;
+        }
+
+        document.querySelectorAll('.tlmn-card').forEach(c => c.classList.remove('selected'));
+        cardEl.classList.add('selected');
+        playFlip();
+    }
+
+    function selectCombo(idArray) {
+        const firstEl = document.querySelector(`.tlmn-card[data-id="${idArray[0]}"]`);
+        const isCurrentlySelected = firstEl.classList.contains('selected');
+        document.querySelectorAll('.tlmn-card').forEach(c => c.classList.remove('selected'));
+
+        if (!isCurrentlySelected) {
+            idArray.forEach(id => {
+                const el = document.querySelector(`.tlmn-card[data-id="${id}"]`);
+                if (el && !el.classList.contains('played')) el.classList.add('selected');
+            });
+        }
+        playFlip();
+    }
+
+    function kidPlaysCards(cards, message) {
+        playPop();
+        document.getElementById('tlmn-kid-text').innerHTML = message;
+        
+        const cb = document.getElementById('tlmn-center-board');
+        cb.innerHTML = ''; 
+        
+        setTimeout(() => {
+            playSnap();
+            updateKidHand(kidCardCount - cards.length);
+
+            cards.forEach((card, index) => {
+                const c = document.createElement('div');
+                c.className = 'tlmn-card-play show glow-kid'; 
+                let offset = (cards.length === 1) ? 0 : (index - (cards.length-1)/2) * 35; 
+                c.style.setProperty('--ml', `${offset}px`);
+                c.style.setProperty('--rot', `${(Math.random()*4 - 2)}deg`); 
+                c.innerHTML = createCardHTML(card.v, card.s, card.c);
+                cb.appendChild(c);
+            });
+        }, 800);
+    }
+
+    function executePlayerPlay(selectedEls, kidResponse) {
+        playSnap();
+        const cb = document.getElementById('tlmn-center-board');
+        cb.innerHTML = ''; 
+        
+        updatePlayerCount(playerCardCount - selectedEls.length);
+
+        selectedEls.forEach((el, index) => {
+            el.classList.remove('selected');
+            el.classList.add('played'); 
+            
+            const c = document.createElement('div'); 
+            c.className = 'tlmn-card-play show glow-player'; 
+            let offset = (selectedEls.length === 1) ? 0 : (index - (selectedEls.length-1)/2) * 35;
+            c.style.setProperty('--ml', `${offset}px`);
+            c.style.setProperty('--rot', `${(Math.random()*4 - 2)}deg`);
+            c.innerHTML = el.innerHTML; 
+            cb.appendChild(c);
+        });
+        document.getElementById('tlmn-kid-text').innerHTML = kidResponse;
+    }
+
+    function playerPlayCard() {
+        const selected = Array.from(document.querySelectorAll('.tlmn-card.selected'));
+        const dt = document.getElementById('tlmn-kid-text');
+        if (selected.length === 0) { playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Vui lòng chọn bài trước khi đánh!</span>`; return; }
+
+        const selIds = selected.map(c => c.getAttribute('data-id')).sort();
+
+        if (tlmnState === 1) {
+            const req = ['10H', '7D', '8C', '9S', 'JD'].sort();
+            if (JSON.stringify(selIds) !== JSON.stringify(req)) {
+                playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Bấm vào 1 lá trong Sảnh 5 (7-8-9-10-J) để hệ thống tự xếp nhé!</span>`;
+                selected.forEach(c => c.classList.remove('selected')); return;
+            }
+            executePlayerPlay(selected, `"Ây da, sảnh to thế! Ta bỏ lượt. Tới em đánh."`);
+            tlmnState = 2;
+        } 
+        else if (tlmnState === 2) {
+            const req = ['5H', '5S'].sort();
+            if (JSON.stringify(selIds) !== JSON.stringify(req)) {
+                playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Bài em làm gì còn sảnh, bấm vào số 5 để đánh Đôi 5 đi cho gọn!</span>`;
+                selected.forEach(c => c.classList.remove('selected')); return;
+            }
+            executePlayerPlay(selected, `"Đôi 5 à? Ta đè bằng <b>Đôi J</b> nhé!"`);
+            setTimeout(() => { kidPlaysCards([ { v: 'J', s: '♣', c: '#2c3e50' }, { v: 'J', s: '♠', c: '#2c3e50' } ], `"Đôi J rồi, em có đôi nào to hơn đè lại không?"`); tlmnState = 3; }, 1500);
+        } 
+        else if (tlmnState === 3) {
+            const req = ['KD', 'KS'].sort();
+            if (JSON.stringify(selIds) !== JSON.stringify(req)) {
+                playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Dùng Đôi K đè lại dằn mặt ta đi chứ! (Chỉ cần bấm vào lá K)</span>`;
+                selected.forEach(c => c.classList.remove('selected')); return;
+            }
+            executePlayerPlay(selected, `"Ối! Đôi K cơ à... Chịu rồi, bỏ lượt. Em đánh tiếp đi."`);
+            tlmnState = 4;
+        }
+        else if (tlmnState === 4) {
+            if (selIds.length !== 1 || selIds[0] !== 'QC') {
+                playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Tống lá Q đi cho rảnh tay em ơi!</span>`;
+                selected.forEach(c => c.classList.remove('selected')); return;
+            }
+            executePlayerPlay(selected, `"Lá Q lẻ à? Bắt bằng <b>K Chuồn</b> nhé!"`);
+            setTimeout(() => { kidPlaysCards([ { v: 'K', s: '♣', c: '#2c3e50' } ], `"K Chuồn chặn đứng! Có đỡ được không?"`); tlmnState = 5; }, 1500);
+        }
+        else if (tlmnState === 5) {
+            playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Đem Át ra chặt K thì phí lắm, để dành chốt hạ! Bấm nút <b>BỎ LƯỢT</b> đi!</span>`;
+            selected.forEach(c => c.classList.remove('selected')); return;
+        }
+        else if (tlmnState === 6) {
+            playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Bài em làm gì có Sảnh 3 mà đỡ? Bấm <b>BỎ LƯỢT</b>!</span>`;
+            selected.forEach(c => c.classList.remove('selected')); return;
+        }
+        else if (tlmnState === 7) {
+            if (selIds.length !== 1 || selIds[0] !== '2H') {
+                playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Hắn ra Heo Rô kìa, dùng Heo Cơ (2♥) chặt đẹp ngay!</span>`;
+                selected.forEach(c => c.classList.remove('selected')); return;
+            }
+            executePlayerPlay(selected, `"Hự... Giấu Heo kín thế! Được rồi, ta bỏ lượt."`);
+            tlmnState = 8;
+        }
+        else if (tlmnState === 8) {
+            if (selIds.length !== 1 || selIds[0] !== '3C') {
+                playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Chơi Tiến lên ai lại đánh Át trước để ủ lá 3 thối lại sau cùng? Đánh con 3 đi em!</span>`;
+                selected.forEach(c => c.classList.remove('selected')); return;
+            }
+            executePlayerPlay(selected, `"Chỉ là lá 3 rác thôi ư? Vậy ta xin chốt sổ nhé!"`);
+            document.getElementById('action-btns').style.display = 'none';
+
+            setTimeout(() => {
+                kidPlaysCards([{ v: 'A', s: '♠', c: '#2c3e50' }], `"<b>ÁT BÍCH (A♠)</b> bắt lá 3 nhé! Ta hết bài rồi, em thua trắng tay! Hahaha 😎"`);
+                setTimeout(() => { playSiren(); document.getElementById('fraud-alert').style.display = 'flex'; }, 2500);
+            }, 1500);
+        }
+    }
+
+    function playerPass() {
+        const dt = document.getElementById('tlmn-kid-text');
+        if (tlmnState === 5) {
+            playPop(); document.getElementById('tlmn-center-board').innerHTML = '';
+            kidPlaysCards([{v:'8',s:'♠',c:'#2c3e50'},{v:'9',s:'♦',c:'#c0392b'},{v:'10',s:'♣',c:'#2c3e50'}], `"Bỏ lượt à? Vậy chạy tiếp cái <b>Sảnh 3 (8-9-10)</b> nhé!"`);
+            tlmnState = 6;
+        } else if (tlmnState === 6) {
+            playPop(); document.getElementById('tlmn-center-board').innerHTML = '';
+            kidPlaysCards([{v:'2',s:'♦',c:'#c0392b'}], `"Tiếp tục bỏ lượt sao? Tới công chuyện luôn: <b>HEO RÔ (2♦)</b>!"`);
+            tlmnState = 7;
+        } else {
+            playPop(); dt.innerHTML = `<span style="color:#e74c3c;">Đang nắm thế thượng phong sao lại bỏ lượt? Chọn bài đánh đi!</span>`;
+        }
+    }
+
+    function exposeFraud() {
+        playSnap();
+        document.getElementById('fraud-alert').style.display = 'none';
+        document.getElementById('tlmn-dialogue').style.display = 'none';
+        document.getElementById('player-hand').style.display = 'none';
+        document.getElementById('player-counter').style.display = 'none';
+        document.getElementById('tlmn-center-board').style.display = 'none';
+        document.querySelector('.tlmn-kid-zone').style.display = 'none';
+        document.getElementById('action-btns').style.display = 'none';
+
+        const exposeBox = document.getElementById('expose-box');
+        exposeBox.classList.add('show');
+        
+        document.getElementById('kid-fraud-card').innerHTML = createCardHTML('A','♠','#2c3e50');
+        document.getElementById('player-fraud-card').innerHTML = createCardHTML('A','♠','#2c3e50');
+
+        setTimeout(() => {
+            exposeBox.classList.remove('show');
+            setTimeout(() => {
+                document.getElementById('tlmn-arena').style.display = 'none';
+                
+                // Cập nhật số tiền x2 lên Box kết quả
+                const finalMoney = gachaTotalScore * 2;
+                document.getElementById('x2-final-score').innerText = formatCurrency(finalMoney);
+                updateProfileBalance(finalMoney);
+
+                document.getElementById('final-farewell-box').style.display = 'block';
+                let burst = 0; let fw = setInterval(() => { createMixedFirework(window.innerWidth * Math.random(), window.innerHeight * Math.random()); burst++; if(burst > 15) clearInterval(fw); }, 300);
+            }, 500);
+        }, 5000); 
+    }
+</script>
+</body>
+</html>
